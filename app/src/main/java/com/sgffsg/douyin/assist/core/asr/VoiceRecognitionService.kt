@@ -197,7 +197,7 @@ class VoiceRecognitionService(
         try {
             // Vosk返回的是JSON格式
             val jsonResult = JSONObject(hypothesis)
-            val text = jsonResult.optString("text", "")
+            val text = jsonResult.optString("text", "").replace(" ", "")
             
             if (text.isBlank()) {
                 return
@@ -208,10 +208,10 @@ class VoiceRecognitionService(
             // 匹配语音指令
             val command = VoiceCommand.fromText(text)
             if (command != null) {
-                LogUtil.d(TAG, "匹配到指令: ${command.name}")
+//                LogUtil.i(TAG, "匹配到指令: ${command.name}")
                 listener?.onCommandRecognized(command, text)
             } else {
-                LogUtil.d(TAG, "未匹配到有效指令: $text")
+//                LogUtil.d(TAG, "未匹配到有效指令: $text")
             }
         } catch (e: Exception) {
             Log.e(TAG, "解析识别结果失败: ${e.message}", e)
