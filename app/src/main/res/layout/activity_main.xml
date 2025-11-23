@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rl_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.sgffsg.douyin.assist.MainActivity">
+    <Button
+        android:id="@+id/btn_media_record_audio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="录制音频"/>
+    <Button
+        android:id="@+id/btn_media_play_audio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="播放音频"/>
+    <Button
+        android:id="@+id/btn_media_record_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="录制视频"/>
+    <Button
+        android:id="@+id/btn_media_play_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="播放视频"/>
+    <Button
+        android:id="@+id/btn_media_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="相机"/>
+    <Button
+        android:id="@+id/btn_vosk_demo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="vosk示例"/>
+    <Button
+        android:id="@+id/btn_assist_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="助手设置"/>
+
+</LinearLayout>
