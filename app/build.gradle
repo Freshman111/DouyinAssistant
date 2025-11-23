@@ -3,6 +3,17 @@ plugins {
     id 'kotlin-android'
 }
 
+// 1. 定义一个 Properties 对象
+def localProperties = new Properties()
+
+// 2. 检查 local.properties 文件是否存在，如果存在则加载
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { stream ->
+        localProperties.load(stream)
+    }
+}
+
 android {
     compileSdk 31
 
@@ -20,8 +31,28 @@ android {
         }
     }
 
+    signingConfigs {
+        debug {
+            storeFile file("$rootProject.projectDir/sign/douyin-assist-key.jks")
+            storePassword localProperties.getProperty('sign_pasword')
+            keyAlias 'douyin-assist-alias'
+            keyPassword localProperties.getProperty('sign_pasword')
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+        release {
+            storeFile file("$rootProject.projectDir/sign/douyin-assist-key.jks")
+            storePassword localProperties.getProperty('sign_pasword')
+            keyAlias 'douyin-assist-alias'
+            keyPassword localProperties.getProperty('sign_pasword')
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
