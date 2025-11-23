@@ -11,8 +11,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.viewbinding.ViewBinding
 import com.sgffsg.douyin.assist.ui.binding.BaseBindingActivity
+import com.sgffsg.douyin.assist.util.LogUtil
 import com.youdao.luna.appbase.permissions.PermissionsInterface
-import timber.log.Timber
 import java.util.*
 
 /**
@@ -51,7 +51,7 @@ abstract class PermissionActivity<T : ViewBinding> : BaseBindingActivity<T>(),
      * 检查是否所有必须权限已经授予并且申请所有未授权的权限
      */
     protected fun checkAllNeedPermissions() {
-        Timber.i("checkAllNeedPermissions")
+        LogUtil.i("PermissionActivity", "checkAllNeedPermissions")
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
         val needRequestPermissionList = getDeniedPermissions(needPermissionsDelegate)
         if (!needRequestPermissionList.isNullOrEmpty()) {
@@ -76,13 +76,9 @@ abstract class PermissionActivity<T : ViewBinding> : BaseBindingActivity<T>(),
         val needRequestPermissionList: MutableList<String> =
             ArrayList()
         for (permission in permissions) {
-            Timber.i(
-                "%s%s%s%s%s",
-                permission,
-                ": ",
-                ContextCompat.checkSelfPermission(this, permission),
-                " , ",
-                ActivityCompat.shouldShowRequestPermissionRationale(this, permission)
+            LogUtil.i(
+                "PermissionActivity",
+                "$permission: ${ContextCompat.checkSelfPermission(this, permission)} , ${ActivityCompat.shouldShowRequestPermissionRationale(this, permission)}"
             )
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -95,7 +91,7 @@ abstract class PermissionActivity<T : ViewBinding> : BaseBindingActivity<T>(),
                 needRequestPermissionList.add(permission)
             }
         }
-        Timber.i("needRequestPermissionList: %s", needRequestPermissionList)
+        LogUtil.i("PermissionActivity", "needRequestPermissionList: $needRequestPermissionList")
         return needRequestPermissionList
     }
 
@@ -105,7 +101,7 @@ abstract class PermissionActivity<T : ViewBinding> : BaseBindingActivity<T>(),
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, paramArrayOfInt)
         if (requestCode == REQUEST_CODE_PERMISSION) {
-            Timber.i("onRequestPermissionsResult")
+            LogUtil.i("PermissionActivity", "onRequestPermissionsResult")
             if (!verifyPermissionGrantResults(paramArrayOfInt)) {
                 onPermissionGrantedFailed()
                 showSettingDialog()

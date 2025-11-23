@@ -8,6 +8,7 @@ import android.media.MediaRecorder
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.sgffsg.douyin.assist.util.LogUtil
 
 /**
  * AudioRecord包装类，支持帧数据回调
@@ -83,7 +84,7 @@ class AudioRecordWrapper @JvmOverloads constructor(
 
     @Synchronized
     fun cancelAndCleanup() {
-        Log.d(TAG, "cancelAndCleanup")
+        LogUtil.d(TAG, "cancelAndCleanup")
         realListener = null
         if (recorder.state == AudioRecord.STATE_INITIALIZED) {
             recorder.stop()

@@ -1,7 +1,6 @@
 package com.sgffsg.douyin.assist.util
 
 import android.view.View
-import timber.log.Timber
 
 /**
  * @author: lmk
@@ -36,7 +35,7 @@ private fun <T : View> T.clickEnable(): Boolean {
     if (currentClickTime - triggerLastTime >= triggerDelay) {
         flag = true
     }
-    Timber.d("fastClick", "$flag $currentClickTime $triggerLastTime")
+    LogUtil.d("Extensions", "fastClick: $flag $currentClickTime $triggerLastTime")
     triggerLastTime = currentClickTime
     return flag
 }

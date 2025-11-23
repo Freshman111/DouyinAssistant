@@ -7,7 +7,7 @@ import android.widget.Toast
 import com.sgffsg.douyin.assist.R
 import com.sgffsg.douyin.assist.databinding.ActivityPlayOnlineAudioBinding
 import com.sgffsg.douyin.assist.ui.binding.BaseBindingActivity
-import timber.log.Timber
+import com.sgffsg.douyin.assist.util.LogUtil
 
 class PlayOnlineAudioActivity : BaseBindingActivity<ActivityPlayOnlineAudioBinding>() {
     var isPaused = false
@@ -55,22 +55,22 @@ class PlayOnlineAudioActivity : BaseBindingActivity<ActivityPlayOnlineAudioBindi
     private fun initPlayer(sourceUrl: String) {
         player.setOnPreparedListener {
             isPrepared = true
-            Timber.i("onCreate: onPrepared")
+            LogUtil.i("PlayOnlineAudio", "onCreate: onPrepared")
             try {
                 player.playbackParams = PlaybackParams().setSpeed(1.0f)
             } catch (e: IllegalArgumentException) {
-                Timber.i("onPrepared: ${e.message}")
+                LogUtil.i("PlayOnlineAudio", "onPrepared: ${e.message}")
                 e.printStackTrace();
             }
             play()
         }
         player.setOnCompletionListener {
-            Timber.i("onCreate: onCompletion")
+            LogUtil.i("PlayOnlineAudio", "onCreate: onCompletion")
             isPaused = false
             binding.btnPlay.setText(R.string.play)
         }
         player.setOnErrorListener { mp, what, extra ->
-            Timber.i("onCreate: onError")
+            LogUtil.e("PlayOnlineAudio", "onCreate: onError")
             return@setOnErrorListener false
         }
         player.reset()

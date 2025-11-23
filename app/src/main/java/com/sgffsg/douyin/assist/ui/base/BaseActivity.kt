@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
-import timber.log.Timber
+import com.sgffsg.douyin.assist.util.LogUtil
 
 /**
  * Base Activity
@@ -15,52 +15,53 @@ import timber.log.Timber
  */
 abstract class BaseActivity : AppCompatActivity() {
 
+    private val TAG = "BaseActivity"
+
     private var onCreate: Long = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         onCreate = System.currentTimeMillis()
         super.onCreate(savedInstanceState)
-        Timber.d("$this onCreate")
+        LogUtil.i(TAG, "$this onCreate")
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Timber.d("$this onNewIntent")
+        LogUtil.i(TAG, "$this onNewIntent")
     }
 
     override fun onRestart() {
         super.onRestart()
-        Timber.d("$this onRestart")
+        LogUtil.i(TAG, "$this onRestart")
     }
 
     override fun onStart() {
         super.onStart()
-        Timber.d("$this onStart")
+        LogUtil.i(TAG, "$this onStart")
     }
 
     override fun onResume() {
         super.onResume()
-        Timber.d("$this onResume")
+//        LogUtil.d(TAG, "$this onResume")
         if (onCreate > 0) {
-            Timber.tag("ActivityReadyTime: (onCreate - onResume)")
-                .i("${this.javaClass.name} use time = ${System.currentTimeMillis() - onCreate}")
+            LogUtil.i("ActivityReadyTime", "${this.javaClass.name} use time = ${System.currentTimeMillis() - onCreate}")
             onCreate = -1
         }
     }
 
     override fun onPause() {
         super.onPause()
-        Timber.d("$this onPause")
+//        LogUtil.d(TAG, "$this onPause")
     }
 
     override fun onStop() {
         super.onStop()
-        Timber.d("$this onStop")
+        LogUtil.i(TAG, "$this onStop")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Timber.d("$this onDestroy")
+        LogUtil.i(TAG, "$this onDestroy")
     }
 
     override fun setContentView(@LayoutRes layoutResID: Int) {

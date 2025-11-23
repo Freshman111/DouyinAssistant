@@ -1,0 +1,175 @@
+package com.sgffsg.douyin.assist.core.accessibility
+
+import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.GestureDescription
+import android.graphics.Path
+import android.view.accessibility.AccessibilityNodeInfo
+import com.sgffsg.douyin.assist.core.accessibility.utils.AccessibilityHelper
+import com.sgffsg.douyin.assist.util.LogUtil
+
+/**
+ * 无障碍服务手势执行类
+ * 负责执行各种手势操作
+ */
+class AssistAccessibilityPerform(
+    private val service: AccessibilityService
+) {
+
+    private val TAG = "AccessibilityPerform"
+
+    /**
+     * 执行点赞操作
+     */
+    fun performLike() {
+        val rootNode = service.rootInActiveWindow ?: return
+        
+        val likeButton = findLikeButton(rootNode)
+        if (likeButton != null && likeButton.isClickable) {
+            likeButton.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            LogUtil.d(TAG, "执行点赞操作")
+        } else {
+            // 如果找不到按钮，使用坐标点击
+            val screenWidth = service.resources.displayMetrics.widthPixels
+            val screenHeight = service.resources.displayMetrics.heightPixels
+            performClick((screenWidth * 0.85).toInt(), (screenHeight * 0.65).toInt())
+        }
+        
+        rootNode.recycle()
+    }
+
+    /**
+     * 执行向上滑动（下一个视频）
+     */
+    fun performSwipeUp() {
+        val screenWidth = service.resources.displayMetrics.widthPixels
+        val screenHeight = service.resources.displayMetrics.heightPixels
+        
+        val startX = screenWidth / 2f
+        val startY = screenHeight * 0.8f
+        val endY = screenHeight * 0.2f
+        
+        performSwipe(startX, startY, startX, endY, 300)
+        LogUtil.d(TAG, "执行向上滑动")
+    }
+
+    /**
+     * 执行向下滑动（上一个视频）
+     */
+    fun performSwipeDown() {
+        val screenWidth = service.resources.displayMetrics.widthPixels
+        val screenHeight = service.resources.displayMetrics.heightPixels
+        
+        val startX = screenWidth / 2f
+        val startY = screenHeight * 0.2f
+        val endY = screenHeight * 0.8f
+        
+        performSwipe(startX, startY, startX, endY, 300)
+        LogUtil.d(TAG, "执行向下滑动")
+    }
+
+    /**
+     * 执行返回操作
+     */
+    fun performBack() {
+        service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+        LogUtil.d(TAG, "执行返回操作")
+    }
+
+    /**
+     * 执行Home操作
+     */
+    fun performHome() {
+        service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
+        LogUtil.d(TAG, "执行Home操作")
+    }
+
+    /**
+     * 执行最近任务操作
+     */
+    fun performRecents() {
+        service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS)
+        LogUtil.d(TAG, "执行最近任务操作")
+    }
+
+    /**
+     * 查找点赞按钮
+     * 抖音的点赞按钮通常有特定的资源ID或描述
+     */
+    private fun findLikeButton(rootNode: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+        // 方法1: 通过资源ID查找（需要根据实际抖音版本调整）
+        val likeNodes = rootNode.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a0x")
+        if (likeNodes.isNotEmpty()) {
+            return likeNodes[0]
+        }
+        
+        // 方法2: 通过内容描述查找
+        val nodesByDesc = AccessibilityHelper.findNodesByText(rootNode, "点赞", false)
+        if (nodesByDesc.isNotEmpty()) {
+            return nodesByDesc[0]
+        }
+        
+        // 方法3: 通过坐标位置（点赞按钮通常在右下角）
+        return findNodeAtRightBottom(rootNode)
+    }
+
+    /**
+     * 查找右下角的节点（通常是点赞按钮位置）
+     */
+    private fun findNodeAtRightBottom(rootNode: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+        val screenWidth = service.resources.displayMetrics.widthPixels
+        val screenHeight = service.resources.displayMetrics.heightPixels
+        
+        // 右下角区域
+        val targetX = (screenWidth * 0.85).toInt()
+        val targetY = (screenHeight * 0.65).toInt()
+        
+        return AccessibilityHelper.findNodeByPosition(rootNode, targetX, targetY)
+    }
+
+    /**
+     * 执行滑动手势
+     */
+    private fun performSwipe(startX: Float, startY: Float, endX: Float, endY: Float, duration: Long) {
+        val path = Path()
+        path.moveTo(startX, startY)
+        path.lineTo(endX, endY)
+        
+        val builder = GestureDescription.Builder()
+        builder.addStroke(GestureDescription.StrokeDescription(path, 0, duration))
+        
+        service.dispatchGesture(builder.build(), null, null)
+    }
+
+    /**
+     * 执行点击手势
+     */
+    private fun performClick(x: Int, y: Int) {
+        val path = Path()
+        path.moveTo(x.toFloat(), y.toFloat())
+        
+        val builder = GestureDescription.Builder()
+        builder.addStroke(GestureDescription.StrokeDescription(path, 0, 100))
+        
+        service.dispatchGesture(builder.build(), null, null)
+        LogUtil.d(TAG, "执行点击操作: ($x, $y)")
+    }
+
+    /**
+     * 分析当前屏幕内容
+     */
+    fun analyzeCurrentScreen() {
+        val rootNode = service.rootInActiveWindow ?: return
+        
+        // 检查是否可以滑动
+        val canScroll = AccessibilityHelper.isScrollable(rootNode)
+        LogUtil.d(TAG, "当前界面可滑动: $canScroll")
+        
+        // 查找点赞按钮
+        val likeButton = findLikeButton(rootNode)
+        if (likeButton != null) {
+            LogUtil.d(TAG, "找到点赞按钮")
+        }
+        
+        rootNode.recycle()
+    }
+}

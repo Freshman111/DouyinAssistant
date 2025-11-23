@@ -9,7 +9,6 @@ import com.sgffsg.douyin.assist.core.accessibility.AssistAccessibilityService
 import com.sgffsg.douyin.assist.databinding.ActivityAssistSettingBinding
 import com.sgffsg.douyin.assist.ui.binding.BaseBindingActivity
 import com.sgffsg.douyin.assist.viewmodel.MainViewModel
-import timber.log.Timber
 
 /**
  * 助手设置界面

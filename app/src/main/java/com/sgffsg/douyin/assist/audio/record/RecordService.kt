@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import timber.log.Timber
+import com.sgffsg.douyin.assist.util.LogUtil
 
 /**
  * @author: lmk
@@ -16,7 +16,7 @@ class RecordService : Service() {
 
     private val localReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Timber.i("hideReceiver Initializer ---onReceive ${intent?.action}")
+            LogUtil.i("RecordService", "hideReceiver Initializer ---onReceive ${intent?.action}")
             if (context != null) {
 
             }
@@ -29,7 +29,7 @@ class RecordService : Service() {
     }
 
     override fun onCreate() {
-        Timber.d("onCreate   ===>")
+        LogUtil.d("RecordService", "onCreate   ===>")
         super.onCreate()
         registerHideReceiver()
     }
@@ -48,7 +48,7 @@ class RecordService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Timber.e("Initializer ---onDestroy unRegisterReceivers")
+        LogUtil.e("RecordService", "Initializer ---onDestroy unRegisterReceivers")
         unRegisterReceiver()
     }
 
