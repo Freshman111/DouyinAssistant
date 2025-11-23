@@ -4,7 +4,6 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.graphics.Path
 import android.view.accessibility.AccessibilityNodeInfo
-import com.sgffsg.douyin.assist.core.accessibility.utils.AccessibilityHelper
 import com.sgffsg.douyin.assist.util.LogUtil
 
 /**
@@ -12,7 +11,8 @@ import com.sgffsg.douyin.assist.util.LogUtil
  * 负责执行各种手势操作
  */
 class AssistAccessibilityPerform(
-    private val service: AccessibilityService
+    private val service: AccessibilityService,
+    private val scanner: AssistAccessibilityScan
 ) {
 
     private val TAG = "AccessibilityPerform"
@@ -23,7 +23,7 @@ class AssistAccessibilityPerform(
     fun performLike() {
         val rootNode = service.rootInActiveWindow ?: return
         
-        val likeButton = findLikeButton(rootNode)
+        val likeButton = scanner.findLikeButton(rootNode)
         if (likeButton != null && likeButton.isClickable) {
             likeButton.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             LogUtil.d(TAG, "执行点赞操作")
@@ -92,41 +92,6 @@ class AssistAccessibilityPerform(
     }
 
     /**
-     * 查找点赞按钮
-     * 抖音的点赞按钮通常有特定的资源ID或描述
-     */
-    private fun findLikeButton(rootNode: AccessibilityNodeInfo): AccessibilityNodeInfo? {
-        // 方法1: 通过资源ID查找（需要根据实际抖音版本调整）
-        val likeNodes = rootNode.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a0x")
-        if (likeNodes.isNotEmpty()) {
-            return likeNodes[0]
-        }
-        
-        // 方法2: 通过内容描述查找
-        val nodesByDesc = AccessibilityHelper.findNodesByText(rootNode, "点赞", false)
-        if (nodesByDesc.isNotEmpty()) {
-            return nodesByDesc[0]
-        }
-        
-        // 方法3: 通过坐标位置（点赞按钮通常在右下角）
-        return findNodeAtRightBottom(rootNode)
-    }
-
-    /**
-     * 查找右下角的节点（通常是点赞按钮位置）
-     */
-    private fun findNodeAtRightBottom(rootNode: AccessibilityNodeInfo): AccessibilityNodeInfo? {
-        val screenWidth = service.resources.displayMetrics.widthPixels
-        val screenHeight = service.resources.displayMetrics.heightPixels
-        
-        // 右下角区域
-        val targetX = (screenWidth * 0.85).toInt()
-        val targetY = (screenHeight * 0.65).toInt()
-        
-        return AccessibilityHelper.findNodeByPosition(rootNode, targetX, targetY)
-    }
-
-    /**
      * 执行滑动手势
      */
     private fun performSwipe(startX: Float, startY: Float, endX: Float, endY: Float, duration: Long) {
@@ -152,24 +117,5 @@ class AssistAccessibilityPerform(
         
         service.dispatchGesture(builder.build(), null, null)
         LogUtil.d(TAG, "执行点击操作: ($x, $y)")
-    }
-
-    /**
-     * 分析当前屏幕内容
-     */
-    fun analyzeCurrentScreen() {
-        val rootNode = service.rootInActiveWindow ?: return
-        
-        // 检查是否可以滑动
-        val canScroll = AccessibilityHelper.isScrollable(rootNode)
-        LogUtil.d(TAG, "当前界面可滑动: $canScroll")
-        
-        // 查找点赞按钮
-        val likeButton = findLikeButton(rootNode)
-        if (likeButton != null) {
-            LogUtil.d(TAG, "找到点赞按钮")
-        }
-        
-        rootNode.recycle()
     }
 }

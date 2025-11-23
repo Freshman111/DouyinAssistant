@@ -3,7 +3,7 @@ package com.sgffsg.douyin.assist.core.accessibility
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.os.Handler
-import android.os.Looper
+import android.os.HandlerThread
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityEvent
@@ -14,8 +14,9 @@ import com.sgffsg.douyin.assist.util.LogUtil
 
 class AssistAccessibilityService : AccessibilityService() {
 
-    private val TAG = "AssistAccessibility"
-    private val handler = Handler(Looper.getMainLooper())
+    // 扫描线程
+    private lateinit var scanThread: HandlerThread
+    private lateinit var scanHandler: Handler
     
     // 语音识别服务
     private var voiceRecognitionService: VoiceRecognitionService? = null
@@ -23,8 +24,12 @@ class AssistAccessibilityService : AccessibilityService() {
     
     // 手势执行器
     private lateinit var performer: AssistAccessibilityPerform
+    
+    // 界面扫描器
+    private lateinit var scanner: AssistAccessibilityScan
 
     companion object {
+        const val TAG = "AssistAccessibility"
         var instance: AssistAccessibilityService? = null
 
         fun isAccessibilitySettingsOn(context: Context): Boolean {
@@ -36,7 +41,7 @@ class AssistAccessibilityService : AccessibilityService() {
                     Settings.Secure.ACCESSIBILITY_ENABLED
                 )
             } catch (e: Settings.SettingNotFoundException) {
-                LogUtil.e("DouyinAccessibility", "Error finding setting: " + e.message)
+                LogUtil.e(TAG, "Error finding setting: " + e.message)
             }
 
             val colonSplitter = TextUtils.SimpleStringSplitter(':')
@@ -63,7 +68,15 @@ class AssistAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
-        performer = AssistAccessibilityPerform(this)
+        
+        // 初始化扫描线程
+        scanThread = HandlerThread("AccessibilityScanThread").apply {
+            start()
+        }
+        scanHandler = Handler(scanThread.looper)
+        
+        scanner = AssistAccessibilityScan(this)
+        performer = AssistAccessibilityPerform(this, scanner)
         initVoiceRecognition()
         LogUtil.d(TAG, "无障碍服务已连接")
     }
@@ -76,8 +89,10 @@ class AssistAccessibilityService : AccessibilityService() {
                 LogUtil.d(TAG, "窗口状态改变: ${event.packageName}")
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-                // 内容改变时可以检测界面元素
-                performer.analyzeCurrentScreen()
+                // 内容改变时在子线程中检测界面元素
+//                scanHandler.post {
+//                    scanner.analyzeCurrentScreen()
+//                }
             }
         }
     }
@@ -90,6 +105,11 @@ class AssistAccessibilityService : AccessibilityService() {
         super.onDestroy()
         instance = null
         releaseVoiceRecognition()
+        
+        // 释放扫描线程
+        scanHandler.removeCallbacksAndMessages(null)
+        scanThread.quitSafely()
+        
         LogUtil.d(TAG, "服务已销毁")
     }
 
@@ -165,11 +185,6 @@ class AssistAccessibilityService : AccessibilityService() {
         isVoiceControlEnabled = false
         LogUtil.d(TAG, "语音控制已关闭")
     }
-
-    /**
-     * 检查语音控制状态
-     */
-    fun isVoiceControlEnabled(): Boolean = isVoiceControlEnabled
 
     /**
      * 执行语音指令
