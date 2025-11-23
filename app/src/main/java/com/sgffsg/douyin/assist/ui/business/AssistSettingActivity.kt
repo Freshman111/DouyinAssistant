@@ -44,54 +44,6 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
             startActivity(intent)
         }
 
-        // 开始自动点赞
-        binding.btnStartLike.setOnClickListener {
-            if (!AssistAccessibilityService.isAccessibilitySettingsOn(this)) {
-                Toast.makeText(this, "请先开启无障碍服务", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            AssistAccessibilityService.instance?.startAutoLike()
-            Toast.makeText(this, "开始自动点赞", Toast.LENGTH_SHORT).show()
-        }
-
-        // 停止自动点赞
-        binding.btnStopLike.setOnClickListener {
-            AssistAccessibilityService.instance?.stopAutoLike()
-            Toast.makeText(this, "停止自动点赞", Toast.LENGTH_SHORT).show()
-        }
-
-        // 开始自动滑动
-        binding.btnStartSwipe.setOnClickListener {
-            if (!AssistAccessibilityService.isAccessibilitySettingsOn(this)) {
-                Toast.makeText(this, "请先开启无障碍服务", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            AssistAccessibilityService.instance?.startAutoSwipe()
-            Toast.makeText(this, "开始自动滑动", Toast.LENGTH_SHORT).show()
-        }
-
-        // 停止自动滑动
-        binding.btnStopSwipe.setOnClickListener {
-            AssistAccessibilityService.instance?.stopAutoSwipe()
-            Toast.makeText(this, "停止自动滑动", Toast.LENGTH_SHORT).show()
-        }
-
-        // 开始自动点赞+滑动
-        binding.btnStartAuto.setOnClickListener {
-            if (!AssistAccessibilityService.isAccessibilitySettingsOn(this)) {
-                Toast.makeText(this, "请先开启无障碍服务", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            AssistAccessibilityService.instance?.startAutoMode()
-            Toast.makeText(this, "开始自动模式", Toast.LENGTH_SHORT).show()
-        }
-
-        // 停止所有操作
-        binding.btnStopAll.setOnClickListener {
-            AssistAccessibilityService.instance?.stopAll()
-            Toast.makeText(this, "停止所有操作", Toast.LENGTH_SHORT).show()
-        }
-
         // 开启语音控制
         binding.btnStartVoice.setOnClickListener {
             if (!AssistAccessibilityService.isAccessibilitySettingsOn(this)) {

@@ -17,37 +17,12 @@ class AssistAccessibilityService : AccessibilityService() {
     private val TAG = "AssistAccessibility"
     private val handler = Handler(Looper.getMainLooper())
     
-    private var isAutoLikeEnabled = false
-    private var isAutoSwipeEnabled = false
-    private var isAutoModeEnabled = false
-    
-    private var swipeInterval = 5000L // 滑动间隔，默认5秒
-    private var likeDelay = 1000L // 点赞延迟，默认1秒
-    
     // 语音识别服务
     private var voiceRecognitionService: VoiceRecognitionService? = null
     private var isVoiceControlEnabled = false
     
     // 手势执行器
     private lateinit var performer: AssistAccessibilityPerform
-
-    private val autoSwipeRunnable = object : Runnable {
-        override fun run() {
-            if (isAutoSwipeEnabled || isAutoModeEnabled) {
-                performSwipeUp()
-                handler.postDelayed(this, swipeInterval)
-            }
-        }
-    }
-
-    private val autoLikeRunnable = object : Runnable {
-        override fun run() {
-            if (isAutoLikeEnabled || isAutoModeEnabled) {
-                performLike()
-                handler.postDelayed(this, swipeInterval)
-            }
-        }
-    }
 
     companion object {
         var instance: AssistAccessibilityService? = null
@@ -114,102 +89,8 @@ class AssistAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         instance = null
-        stopAll()
         releaseVoiceRecognition()
         LogUtil.d(TAG, "服务已销毁")
-    }
-
-    /**
-     * 执行点赞操作
-     */
-    fun performLike() {
-        performer.performLike()
-    }
-
-    /**
-     * 执行向上滑动（下一个视频）
-     */
-    fun performSwipeUp() {
-        performer.performSwipeUp()
-    }
-
-    /**
-     * 执行向下滑动（上一个视频）
-     */
-    fun performSwipeDown() {
-        performer.performSwipeDown()
-    }
-
-    /**
-     * 开始自动点赞
-     */
-    fun startAutoLike() {
-        isAutoLikeEnabled = true
-        handler.postDelayed(autoLikeRunnable, likeDelay)
-        LogUtil.d(TAG, "开始自动点赞")
-    }
-
-    /**
-     * 停止自动点赞
-     */
-    fun stopAutoLike() {
-        isAutoLikeEnabled = false
-        handler.removeCallbacks(autoLikeRunnable)
-        LogUtil.d(TAG, "停止自动点赞")
-    }
-
-    /**
-     * 开始自动滑动
-     */
-    fun startAutoSwipe() {
-        isAutoSwipeEnabled = true
-        handler.postDelayed(autoSwipeRunnable, swipeInterval)
-        LogUtil.d(TAG, "开始自动滑动")
-    }
-
-    /**
-     * 停止自动滑动
-     */
-    fun stopAutoSwipe() {
-        isAutoSwipeEnabled = false
-        handler.removeCallbacks(autoSwipeRunnable)
-        LogUtil.d(TAG, "停止自动滑动")
-    }
-
-    /**
-     * 开始自动模式（点赞+滑动）
-     */
-    fun startAutoMode() {
-        isAutoModeEnabled = true
-        handler.postDelayed(autoLikeRunnable, likeDelay)
-        handler.postDelayed(autoSwipeRunnable, swipeInterval)
-        LogUtil.d(TAG, "开始自动模式")
-    }
-
-    /**
-     * 停止所有自动操作
-     */
-    fun stopAll() {
-        isAutoLikeEnabled = false
-        isAutoSwipeEnabled = false
-        isAutoModeEnabled = false
-        handler.removeCallbacks(autoLikeRunnable)
-        handler.removeCallbacks(autoSwipeRunnable)
-        LogUtil.d(TAG, "停止所有操作")
-    }
-
-    /**
-     * 设置滑动间隔
-     */
-    fun setSwipeInterval(interval: Long) {
-        swipeInterval = interval
-    }
-
-    /**
-     * 设置点赞延迟
-     */
-    fun setLikeDelay(delay: Long) {
-        likeDelay = delay
     }
 
     // ==================== 语音识别相关方法 ====================
@@ -283,13 +164,6 @@ class AssistAccessibilityService : AccessibilityService() {
         voiceRecognitionService?.stopListening()
         isVoiceControlEnabled = false
         LogUtil.d(TAG, "语音控制已关闭")
-    }
-
-    /**
-     * 暂停/恢复语音识别
-     */
-    fun pauseVoiceControl(pause: Boolean) {
-        voiceRecognitionService?.setPause(pause)
     }
 
     /**
