@@ -1,12 +1,17 @@
 package com.sgffsg.douyin.assist.ui.business
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import com.afollestad.materialdialogs.MaterialDialog
+import com.sgffsg.douyin.assist.R
 import com.sgffsg.douyin.assist.core.accessibility.AssistAccessibilityService
 import com.sgffsg.douyin.assist.databinding.ActivityAssistSettingBinding
+import com.sgffsg.douyin.assist.permissions.PermissionUtil
+import com.sgffsg.douyin.assist.permissions.PermissionX
 import com.sgffsg.douyin.assist.ui.binding.BaseBindingActivity
 import com.sgffsg.douyin.assist.viewmodel.MainViewModel
 
@@ -50,18 +55,48 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
                 Toast.makeText(this, "请先开启无障碍服务", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val success = AssistAccessibilityService.instance?.startVoiceControl() ?: false
-            if (success) {
-                Toast.makeText(this, "语音控制已开启，请说话...", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "语音控制开启失败", Toast.LENGTH_SHORT).show()
-            }
+            PermissionX.with(this)
+                .permission(Manifest.permission.RECORD_AUDIO)
+                .onGranted {
+                    startVoiceControl()
+                }
+                .onDenied { deniedList ->
+                    Toast.makeText(this, "您拒绝了权限: $deniedList", Toast.LENGTH_SHORT).show()
+                }
+                .onPermanentlyDenied { deniedList ->
+                    showRequestPermissionDlg(R.string.settings_page_permission_tip)
+                }
+                .request()
         }
 
         // 关闭语音控制
         binding.btnStopVoice.setOnClickListener {
             AssistAccessibilityService.instance?.stopVoiceControl()
             Toast.makeText(this, "语音控制已关闭", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showRequestPermissionDlg(id: Int) {
+        val dialog = MaterialDialog(this)
+            .title(R.string.settings_page_permission_title)
+            .message(id)
+
+        dialog.show {
+            positiveButton(R.string.confirm) {
+                PermissionUtil.openAppSettings(this@AssistSettingActivity)
+            }
+            negativeButton(R.string.cancel) {
+
+            }
+        }
+    }
+
+    private fun startVoiceControl() {
+        val success = AssistAccessibilityService.instance?.startVoiceControl() ?: false
+        if (success) {
+            Toast.makeText(this, "语音控制已开启，请说话...", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "语音控制开启失败", Toast.LENGTH_SHORT).show()
         }
     }
 

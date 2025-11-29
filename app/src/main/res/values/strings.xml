@@ -5,6 +5,17 @@
     <string name="stop">停止</string>
     <string name="accessibility_service_description">随声刷无障碍服务，可以自动点赞、滑动视频等功能。\n\n此服务不会收集任何个人信息。</string>
 
+    <!--    通用   -->
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+
+    <!--    设置页   -->
+    <string name="settings_page_permission_title">权限提示</string>
+    <string name="settings_page_permission_tip">您拒绝了录音权限，随声刷依赖录音功能才能帮您进行语音识别指令，现在去打开吗</string>
+
+
+
+
     <!--    demo   -->
     <string name="recognize_file">Recognize File</string>
     <string name="recognize_microphone">Recognize Microphone</string>

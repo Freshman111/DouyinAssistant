@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.viewbinding.ViewBinding
 import com.sgffsg.douyin.assist.ui.binding.BaseBindingActivity
 import com.sgffsg.douyin.assist.util.LogUtil
-import com.youdao.luna.appbase.permissions.PermissionsInterface
+import com.sgffsg.douyin.assist.permissions.PermissionsInterface
 import java.util.*
 
 /**

@@ -1,4 +1,4 @@
-package com.youdao.luna.appbase.permissions
+package com.sgffsg.douyin.assist.permissions
 
 /**
  * Android权限管理接口类
