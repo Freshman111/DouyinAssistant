@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">DouyinAssistant</string>
+    <string name="app_name">随声刷</string>
     <string name="play">播放</string>
     <string name="pause">暂停</string>
     <string name="stop">停止</string>
-    <string name="accessibility_service_description">抖音助手无障碍服务，可以自动点赞、滑动视频等功能。\n\n此服务不会收集任何个人信息。</string>
+    <string name="accessibility_service_description">随声刷无障碍服务，可以自动点赞、滑动视频等功能。\n\n此服务不会收集任何个人信息。</string>
 
     <!--    demo   -->
     <string name="recognize_file">Recognize File</string>
