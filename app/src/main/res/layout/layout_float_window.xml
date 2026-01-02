@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cv_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -21,19 +22,20 @@
             android:layout_gravity="center_vertical"
             android:src="@drawable/ic_mic"
             android:padding="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/background_circle_selector"
             android:clickable="true"
             android:focusable="true" />
 
         <TextView
-            android:id="@+id/tv_status"
+            android:id="@+id/tv_asr_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
             android:text="抖音助手"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/iv_close"
@@ -43,7 +45,7 @@
             android:layout_marginStart="8dp"
             android:src="@drawable/ic_close"
             android:padding="2dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/background_circle_selector"
             android:clickable="true"
             android:focusable="true" />
 

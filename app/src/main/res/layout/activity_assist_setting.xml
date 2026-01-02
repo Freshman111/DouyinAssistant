@@ -164,7 +164,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="开启悬浮窗后可以试试显示ASR效果"
+                    android:text="开启悬浮窗后可以实时显示ASR效果"
                     android:textColor="#666666"
                     android:textSize="12sp" />
 
@@ -201,7 +201,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:padding="16dp"
-            android:text="使用说明：\n1. 点击「打开无障碍设置」启用服务\n2. 打开抖音App\n3. 返回本应用，选择功能开始自动操作\n4. 开启「语音控制」后可以说：上滑、下滑、点赞、跳过、返回等指令\n\n注意：请合理使用，避免频繁操作"
+            android:text="@string/settings_use_guide"
             android:textColor="#666666"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/card_overlay" />
