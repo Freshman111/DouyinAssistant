@@ -1,5 +1,8 @@
 package com.sgffsg.douyin.assist.core.overlay
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -47,11 +50,48 @@ class FloatWindowService : Service() {
         return null
     }
 
+    private val CHANNEL_ID = "float_window_service_channel"
+    private val NOTIFICATION_ID = 1001
+
     override fun onCreate() {
         super.onCreate()
         LogUtil.d(TAG, "悬浮窗服务创建")
+        createNotificationChannel()
+        startForegroundService()
         createFloatWindow()
         initVoiceRecognition()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "悬浮窗服务",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "抖音助手悬浮窗服务"
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun startForegroundService() {
+        val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle("抖音助手")
+                .setContentText("悬浮窗服务正在运行")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .build()
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+                .setContentTitle("抖音助手")
+                .setContentText("悬浮窗服务正在运行")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .build()
+        }
+        startForeground(NOTIFICATION_ID, notification)
     }
 
     override fun onDestroy() {
@@ -109,28 +149,60 @@ class FloatWindowService : Service() {
         }
     }
 
+    // 拖动相关变量
+    private var isDragging = false
+    private var lastX = 0f
+    private var lastY = 0f
+
     private fun setupFloatWindow() {
         floatView?.apply {
-            ivDrag?.setOnTouchListener { _, event ->
+            // 处理悬浮窗拖动
+            setOnTouchListener { _, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        // 点击开始，启动ASR识别
-                        startAsrRecognition()
-                        true
+                        // 记录初始触摸位置
+                        lastX = event.rawX
+                        lastY = event.rawY
+                        isDragging = false
+                        return@setOnTouchListener false
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        // 计算移动距离
+                        val offsetX = event.rawX - lastX
+                        val offsetY = event.rawY - lastY
+                        
+                        // 更新悬浮窗位置
+                        layoutParams?.let {
+                            val params = it as WindowManager.LayoutParams
+                            params.x += offsetX.toInt()
+                            params.y += offsetY.toInt()
+                            windowManager?.updateViewLayout(floatView, params)
+                        }
+                        
+                        // 更新最后触摸位置
+                        lastX = event.rawX
+                        lastY = event.rawY
+                        
+                        // 标记为正在拖动
+                        isDragging = true
+                        return@setOnTouchListener true
                     }
                     MotionEvent.ACTION_UP -> {
-                        // 点击结束，停止ASR识别
-                        stopAsrRecognition()
-                        true
+                        // 如果是拖动，不处理点击事件
+                        return@setOnTouchListener isDragging
                     }
-                    else -> false
+                    else -> return@setOnTouchListener false
                 }
             }
 
-            // 关闭按钮
-            findViewById<ImageView>(R.id.iv_close).setOnClickListener {
-                removeFloatWindow()
+            ivDrag?.setOnClickListener {
+                // 点击开始，启动ASR识别
+                startAsrRecognition()
+                // 添加一个短暂的延迟，确保UP事件不会立即停止识别
+                handler.postDelayed({ stopAsrRecognition() }, 100)
             }
+
+
         }
     }
 
