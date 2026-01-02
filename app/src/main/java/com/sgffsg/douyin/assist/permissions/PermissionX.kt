@@ -5,7 +5,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * 权限请求构建器

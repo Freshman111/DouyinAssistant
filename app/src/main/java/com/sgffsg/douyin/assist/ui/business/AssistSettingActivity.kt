@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import com.sgffsg.douyin.assist.R
 import com.sgffsg.douyin.assist.core.accessibility.AssistAccessibilityService
-import com.sgffsg.douyin.assist.core.overlay.FloatWindowService
+import com.sgffsg.douyin.assist.biz.overlay.FloatWindowService
 import com.sgffsg.douyin.assist.databinding.ActivityAssistSettingBinding
 import com.sgffsg.douyin.assist.permissions.PermissionUtil
 import com.sgffsg.douyin.assist.permissions.PermissionX

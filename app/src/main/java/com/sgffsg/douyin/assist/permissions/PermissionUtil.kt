@@ -8,7 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * 权限工具类

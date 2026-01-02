@@ -7,7 +7,7 @@ import android.widget.Toast
 import com.sgffsg.douyin.assist.R
 import com.sgffsg.douyin.assist.databinding.ActivityPlayOnlineAudioBinding
 import com.sgffsg.douyin.assist.ui.binding.BaseBindingActivity
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 class PlayOnlineAudioActivity : BaseBindingActivity<ActivityPlayOnlineAudioBinding>() {
     var isPaused = false

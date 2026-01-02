@@ -7,10 +7,10 @@ import android.os.HandlerThread
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityEvent
-import com.sgffsg.douyin.assist.core.asr.VoiceCommand
-import com.sgffsg.douyin.assist.core.asr.VoiceCommandListener
-import com.sgffsg.douyin.assist.core.asr.VoiceRecognitionService
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.biz.asr.VoiceCommand
+import com.sgffsg.douyin.assist.biz.asr.VoiceCommandListener
+import com.sgffsg.douyin.assist.biz.asr.VoiceRecognitionService
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 class AssistAccessibilityService : AccessibilityService() {
 

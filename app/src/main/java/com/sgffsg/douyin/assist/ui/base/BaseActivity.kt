@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * Base Activity

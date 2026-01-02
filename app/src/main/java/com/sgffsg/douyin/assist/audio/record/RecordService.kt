@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * @author: lmk

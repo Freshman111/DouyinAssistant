@@ -7,8 +7,7 @@ import android.media.AudioRecord.OnRecordPositionUpdateListener
 import android.media.MediaRecorder
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * AudioRecord包装类，支持帧数据回调

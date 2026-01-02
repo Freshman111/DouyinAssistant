@@ -2,7 +2,7 @@ package com.sgffsg.douyin.assist.permissions
 
 import android.Manifest
 import androidx.fragment.app.FragmentActivity
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * 权限工具使用示例

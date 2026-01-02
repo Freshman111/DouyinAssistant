@@ -3,7 +3,7 @@ package com.sgffsg.douyin.assist.ui.record
 import com.sgffsg.douyin.assist.databinding.ActivityAudioRecordBinding
 import com.sgffsg.douyin.assist.ui.dialog.RecordConfigDialog
 import com.sgffsg.douyin.assist.ui.mvvm.MvvmActivity
-import com.sgffsg.douyin.assist.util.clickWithTrigger
+import com.sgffsg.douyin.assist.common.utils.clickWithTrigger
 
 class AudioRecordActivity : MvvmActivity<ActivityAudioRecordBinding>() {
 

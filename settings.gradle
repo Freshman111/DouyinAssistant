@@ -25,3 +25,7 @@ dependencyResolutionManagement {
 rootProject.name = "DouyinAssistant"
 include ':app'
 include ':models'
+include ':router-asr'
+include ':biz-overlay'
+include ':biz-asr'
+include ':common'

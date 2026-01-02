@@ -1,7 +1,7 @@
 package com.sgffsg.douyin.assist.app
 
 import android.app.Application
-import com.sgffsg.douyin.assist.util.LogUtil
+import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
  * @author: lmk
