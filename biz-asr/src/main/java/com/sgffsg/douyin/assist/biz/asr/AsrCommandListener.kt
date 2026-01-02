@@ -3,7 +3,7 @@ package com.sgffsg.douyin.assist.biz.asr
 /**
  * 语音指令监听器
  */
-interface VoiceCommandListener {
+interface AsrCommandListener {
     /**
      * 识别到语音指令
      * @param command 语音指令

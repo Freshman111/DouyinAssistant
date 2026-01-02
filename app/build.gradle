@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.didi.drouter'
 }
 
 // 1. 定义一个 Properties 对象
@@ -91,4 +92,5 @@ dependencies {
     implementation project(':biz-asr')
     implementation project(':biz-overlay')
     implementation project(':common')
+    implementation project(':router-asr')
 }

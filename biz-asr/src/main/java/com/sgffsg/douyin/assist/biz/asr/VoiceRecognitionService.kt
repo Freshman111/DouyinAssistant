@@ -25,7 +25,7 @@ class VoiceRecognitionService(
     
     private var model: Model? = null
     private var speechService: SpeechService? = null
-    private var listener: VoiceCommandListener? = null
+    private var listener: AsrCommandListener? = null
     private var isInitialized = false
     private var isListening = false
 
@@ -82,7 +82,7 @@ class VoiceRecognitionService(
     /**
      * 设置语音指令监听器
      */
-    fun setVoiceCommandListener(listener: VoiceCommandListener?) {
+    fun setVoiceCommandListener(listener: AsrCommandListener?) {
         this.listener = listener
     }
 
@@ -203,6 +203,7 @@ class VoiceRecognitionService(
             }
 
             LogUtil.d(TAG, "识别文本: $text")
+            AsrDispatcher.getInstance().onAsrRecognized(text)
 
             // 匹配语音指令
             val command = VoiceCommand.fromText(text)

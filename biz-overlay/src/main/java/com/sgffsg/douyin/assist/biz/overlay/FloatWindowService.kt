@@ -17,13 +17,16 @@ import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.ImageView
 import android.widget.TextView
+import com.sgffsg.douyin.assist.common.AppRuntime
 import com.sgffsg.douyin.assist.common.utils.LogUtil
+import com.sgffsg.douyin.assist.router.asr.IAsrMonitor
+import com.sgffsg.douyin.assist.router.asr.IAsrMonitorProvider
 
 /**
  * 悬浮窗服务
  * 用于在屏幕上显示ASR识别结果悬浮窗
  */
-class FloatWindowService : Service() {
+class FloatWindowService : Service(), IAsrMonitor {
 
     private val TAG = "FloatWindowService"
     
@@ -54,6 +57,7 @@ class FloatWindowService : Service() {
         createNotificationChannel()
         startForegroundService()
         createFloatWindow()
+        registerMonitorAsr()
     }
 
     private fun createNotificationChannel() {
@@ -91,6 +95,7 @@ class FloatWindowService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         removeFloatWindow()
+        unRegisterMonitorAsr()
         LogUtil.d(TAG, "悬浮窗服务销毁")
     }
 
@@ -201,6 +206,14 @@ class FloatWindowService : Service() {
         } catch (e: Exception) {
             LogUtil.e(TAG, "移除悬浮窗失败: ${e.message}")
         }
+    }
+
+    private fun registerMonitorAsr() {
+        AppRuntime.getService(IAsrMonitorProvider::class.java)?.registerMonitor(this)
+    }
+
+    private fun unRegisterMonitorAsr() {
+        AppRuntime.getService(IAsrMonitorProvider::class.java)?.unRegisterMonitor(this)
     }
 
     private fun updateAsrResult(result: String) {
@@ -315,5 +328,9 @@ class FloatWindowService : Service() {
             }
             return false
         }
+    }
+
+    override fun onAsr(asr: String) {
+        updateAsrResult(asr)
     }
 }

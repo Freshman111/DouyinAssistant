@@ -38,4 +38,5 @@ dependencies {
     api 'com.alphacephei:vosk-android:0.3.47@aar'
     api project(':models')
     implementation project(':common')
+    implementation project(':router-asr')
 }
