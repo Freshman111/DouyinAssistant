@@ -12,6 +12,7 @@
     <!--    设置页   -->
     <string name="settings_page_permission_title">权限提示</string>
     <string name="settings_page_permission_tip">您拒绝了录音权限，随声刷依赖录音功能才能帮您进行语音识别指令，现在去打开吗</string>
+    <string name="settings_use_guide">使用说明：\n1. 点击「打开无障碍设置」启用服务\n2. 打开抖音App\n3. 返回本应用，选择功能开始自动操作\n4. 开启「语音控制」后可以说：上滑、下滑、点赞、跳过、返回等指令\n4. 开启「悬浮窗」后可以实时显示ASR效果\n\n注意：请合理使用，避免频繁操作</string>
 
 
 

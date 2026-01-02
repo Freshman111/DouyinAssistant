@@ -136,6 +136,65 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_dp_8"
+            android:layout_marginEnd="@dimen/dimen_dp_8"
+            android:layout_marginTop="@dimen/dimen_dp_16"
+            app:cardCornerRadius="@dimen/dimen_dp_8"
+            app:cardElevation="@dimen/dimen_dp_4"
+            app:layout_constraintTop_toBottomOf="@id/card_voice">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="悬浮窗控制"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="开启悬浮窗后可以试试显示ASR效果"
+                    android:textColor="#666666"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_start_overlay"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="开启悬浮窗" />
+
+                    <Button
+                        android:id="@+id/btn_stop_overlay"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="关闭悬浮窗" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
         <TextView
             android:id="@+id/tv_usage_hint"
             android:layout_width="match_parent"
@@ -145,7 +204,7 @@
             android:text="使用说明：\n1. 点击「打开无障碍设置」启用服务\n2. 打开抖音App\n3. 返回本应用，选择功能开始自动操作\n4. 开启「语音控制」后可以说：上滑、下滑、点赞、跳过、返回等指令\n\n注意：请合理使用，避免频繁操作"
             android:textColor="#666666"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/card_voice" />
+            app:layout_constraintTop_toBottomOf="@id/card_overlay" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -2,6 +2,8 @@ package com.sgffsg.douyin.assist.ui.business
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -9,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import com.sgffsg.douyin.assist.R
 import com.sgffsg.douyin.assist.core.accessibility.AssistAccessibilityService
+import com.sgffsg.douyin.assist.core.overlay.FloatWindowService
 import com.sgffsg.douyin.assist.databinding.ActivityAssistSettingBinding
 import com.sgffsg.douyin.assist.permissions.PermissionUtil
 import com.sgffsg.douyin.assist.permissions.PermissionX
@@ -74,6 +77,38 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
             AssistAccessibilityService.instance?.stopVoiceControl()
             Toast.makeText(this, "语音控制已关闭", Toast.LENGTH_SHORT).show()
         }
+
+        // 开启悬浮窗
+        binding.btnStartOverlay.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+                // 请求悬浮窗权限
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                startActivity(intent)
+                Toast.makeText(this, "请授予悬浮窗权限后重试", Toast.LENGTH_LONG).show()
+            } else {
+                startFloatWindow()
+            }
+        }
+
+        // 关闭悬浮窗
+        binding.btnStopOverlay.setOnClickListener {
+            stopFloatWindow()
+        }
+    }
+
+    private fun startFloatWindow() {
+        if (FloatWindowService.isServiceRunning(this)) {
+            Toast.makeText(this, "悬浮窗已开启", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        FloatWindowService.startService(this)
+        Toast.makeText(this, "悬浮窗已开启", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun stopFloatWindow() {
+        FloatWindowService.stopService(this)
+        Toast.makeText(this, "悬浮窗已关闭", Toast.LENGTH_SHORT).show()
     }
 
     private fun showRequestPermissionDlg(id: Int) {

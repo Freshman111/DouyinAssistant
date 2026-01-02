@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -34,6 +35,8 @@
         <activity android:name="com.sgffsg.douyin.assist.ui.demo.VoskActivity"/>
 
         <service android:name="com.sgffsg.douyin.assist.audio.record.RecordService"/>
+
+        <service android:name="com.sgffsg.douyin.assist.core.overlay.FloatWindowService" android:enabled="true" android:exported="false"/>
 
         <service
             android:name=".core.accessibility.AssistAccessibilityService"
