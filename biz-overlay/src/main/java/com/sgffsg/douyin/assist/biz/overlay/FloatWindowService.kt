@@ -300,7 +300,7 @@ class FloatWindowService : Service(), IAsrMonitor {
 
     private fun checkPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(this)
+            Settings.canDrawOverlays(applicationContext)
         } else {
             true
         }

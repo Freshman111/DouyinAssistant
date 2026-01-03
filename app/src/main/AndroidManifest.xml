@@ -37,7 +37,9 @@
 
         <service android:name="com.sgffsg.douyin.assist.audio.record.RecordService"/>
 
-        <service android:name="com.sgffsg.douyin.assist.biz.overlay.FloatWindowService" android:enabled="true" android:exported="false"/>
+        <service android:name="com.sgffsg.douyin.assist.biz.overlay.FloatWindowService"
+            android:enabled="true"
+            android:exported="false"/>
 
         <service
             android:name=".core.accessibility.AssistAccessibilityService"

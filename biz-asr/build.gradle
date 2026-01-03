@@ -35,7 +35,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     api 'net.java.dev.jna:jna:5.13.0@aar'
-    api 'com.alphacephei:vosk-android:0.3.47@aar'
+    api files('libs/vosk-lib-release.aar')
     api project(':models')
     implementation project(':common')
     implementation project(':router-asr')
