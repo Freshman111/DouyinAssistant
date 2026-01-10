@@ -90,6 +90,7 @@ dependencies {
 
     implementation 'com.afollestad.material-dialogs:core:3.3.0'
     implementation project(':biz-asr')
+    implementation project(':biz-kws')
     implementation project(':biz-overlay')
     implementation project(':common')
     implementation project(':router-asr')

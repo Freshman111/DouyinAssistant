@@ -7,10 +7,10 @@ import android.os.HandlerThread
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityEvent
-import com.sgffsg.douyin.assist.biz.asr.VoiceCommand
-import com.sgffsg.douyin.assist.biz.asr.AsrCommandListener
-import com.sgffsg.douyin.assist.biz.asr.VoiceRecognitionService
 import com.sgffsg.douyin.assist.common.utils.LogUtil
+import com.sgffsg.douyin.assist.kws.Command
+import com.sgffsg.douyin.assist.kws.KwsRecognitionService
+import com.sgffsg.douyin.assist.kws.listener.CommandListener
 
 class AssistAccessibilityService : AccessibilityService() {
 
@@ -19,7 +19,7 @@ class AssistAccessibilityService : AccessibilityService() {
     private lateinit var scanHandler: Handler
     
     // 语音识别服务
-    private var voiceRecognitionService: VoiceRecognitionService? = null
+    private var voiceRecognitionService: KwsRecognitionService? = null
     private var isVoiceControlEnabled = false
     
     // 手势执行器
@@ -119,19 +119,15 @@ class AssistAccessibilityService : AccessibilityService() {
      * 初始化语音识别服务
      */
     private fun initVoiceRecognition() {
-        voiceRecognitionService = VoiceRecognitionService(this)
-        voiceRecognitionService?.setVoiceCommandListener(object : AsrCommandListener {
-            override fun onCommandRecognized(command: VoiceCommand, originalText: String) {
+        voiceRecognitionService = KwsRecognitionService(this)
+        voiceRecognitionService?.setVoiceCommandListener(object : CommandListener {
+            override fun onCommandRecognized(command: Command, originalText: String) {
                 LogUtil.d(TAG, "收到语音指令: ${command.name}, 原始文本: $originalText")
                 executeVoiceCommand(command)
             }
 
             override fun onError(error: String) {
                 LogUtil.e(TAG, "语音识别错误: $error")
-            }
-
-            override fun onStateChanged(isListening: Boolean) {
-                LogUtil.d(TAG, "语音识别状态: ${if (isListening) "监听中" else "已停止"}")
             }
         })
 
@@ -189,33 +185,33 @@ class AssistAccessibilityService : AccessibilityService() {
     /**
      * 执行语音指令
      */
-    private fun executeVoiceCommand(command: VoiceCommand) {
+    private fun executeVoiceCommand(command: Command) {
         when (command) {
-            VoiceCommand.SWIPE_UP -> {
+            Command.SWIPE_UP -> {
                 performer.performSwipeUp()
                 LogUtil.d(TAG, "执行语音指令: 上滑")
             }
-            VoiceCommand.SWIPE_DOWN -> {
+            Command.SWIPE_DOWN -> {
                 performer.performSwipeDown()
                 LogUtil.d(TAG, "执行语音指令: 下滑")
             }
-            VoiceCommand.NEXT_PAGE -> {
+            Command.NEXT_PAGE -> {
                 performer.performSwipeUp()
                 LogUtil.d(TAG, "执行语音指令: 下一页")
             }
-            VoiceCommand.PREVIOUS_PAGE -> {
+            Command.PREVIOUS_PAGE -> {
                 performer.performSwipeDown()
                 LogUtil.d(TAG, "执行语音指令: 上一页")
             }
-            VoiceCommand.SKIP -> {
+            Command.SKIP -> {
                 performer.performSwipeUp()
                 LogUtil.d(TAG, "执行语音指令: 跳过")
             }
-            VoiceCommand.LIKE -> {
+            Command.LIKE -> {
                 performer.performLike()
                 LogUtil.d(TAG, "执行语音指令: 点赞")
             }
-            VoiceCommand.BACK -> {
+            Command.BACK -> {
                 performer.performBack()
                 LogUtil.d(TAG, "执行语音指令: 返回")
             }
