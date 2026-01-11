@@ -34,6 +34,7 @@
         <activity android:name="com.sgffsg.douyin.assist.ui.play.PlayOnlineAudioActivity"/>
         <activity android:name="com.sgffsg.douyin.assist.ui.record.AudioRecordActivity"/>
         <activity android:name="com.sgffsg.douyin.assist.ui.demo.VoskActivity"/>
+        <activity android:name="com.sgffsg.douyin.assist.ui.business.DebugActivity"/>
 
         <service android:name="com.sgffsg.douyin.assist.audio.record.RecordService"/>
 

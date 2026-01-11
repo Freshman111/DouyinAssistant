@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.media.audiofx.AcousticEchoCanceler
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.k2fsa.sherpa.onnx.KeywordSpotter
@@ -14,6 +15,7 @@ import com.k2fsa.sherpa.onnx.OnlineStream
 import com.k2fsa.sherpa.onnx.getFeatureConfig
 import com.k2fsa.sherpa.onnx.getKeywordsFile
 import com.k2fsa.sherpa.onnx.getKwsModelConfig
+import com.sgffsg.douyin.assist.common.utils.DebugCache
 import com.sgffsg.douyin.assist.common.utils.LogUtil
 import com.sgffsg.douyin.assist.kws.listener.CommandListener
 import kotlin.concurrent.thread
@@ -48,6 +50,9 @@ class KwsRecognitionService(
     //------ record end
 
     private var listener: CommandListener? = null
+    
+    // 音频录制保存功能
+    private val audioRecorder = AudioRecorder()
 
     /**
      * 初始化语音识别模型
@@ -61,6 +66,22 @@ class KwsRecognitionService(
         LogUtil.i(TAG, "Start to initialize model")
         initModel()
         LogUtil.i(TAG, "Finished initializing model")
+    }
+
+    /**
+     * 设置音频保存功能开关
+     * 注意：此方法不再用于设置状态，状态由DebugCache统一管理
+     */
+    fun setSaveAudioEnabled(enabled: Boolean) {
+        // 此方法保留向后兼容性，但实际状态由DebugCache管理
+        DebugCache.setSaveAudioEnabled(enabled)
+    }
+
+    /**
+     * 获取音频保存状态
+     */
+    fun isSaveAudioEnabled(): Boolean {
+        return DebugCache.isSaveAudioEnabled()
     }
 
     /**
@@ -111,19 +132,25 @@ class KwsRecognitionService(
         }
         LogUtil.e(TAG, "state: ${audioRecord?.state}")
         audioRecord?.startRecording()
+        
+        // 如果启用了音频保存，则开始录制
+        if (isSaveAudioEnabled()) {
+            audioRecorder.startRecording(context)
+        }
+        
         isListening = true
 
         LogUtil.e(TAG,  "Created stream. Running ...")
 
-        var keywords = ""
+        val keywords = ""
         Log.i(TAG, "Raw keywords: $keywords")
 
-        keywords = keywords.replace("\n", "/")
-        keywords = keywords.trim()
+        var normalizedKeywords = keywords.replace("\n", "/")
+        normalizedKeywords = normalizedKeywords.trim()
 
-        Log.i(TAG, "Normalized keywords: $keywords")
+        Log.i(TAG, "Normalized keywords: $normalizedKeywords")
 
-        stream = kws.createStream(keywords)
+        stream = kws.createStream(normalizedKeywords)
 
         recordingThread = thread(true) {
             processData()
@@ -143,6 +170,11 @@ class KwsRecognitionService(
         while (isListening) {
             val ret = audioRecord?.read(buffer, 0, buffer.size)
             if (ret != null && ret > 0) {
+                // 如果启用了音频保存，保存原始音频数据
+                if (isSaveAudioEnabled() && audioRecorder.isRecording()) {
+                    audioRecorder.writeAudioData(buffer, ret)
+                }
+                
                 val samples = FloatArray(ret) { buffer[it] / 32768.0f }
                 stream.acceptWaveform(samples, sampleRate = sampleRateInHz)
                 while (kws.isReady(stream)) {
@@ -165,6 +197,11 @@ class KwsRecognitionService(
         audioRecord?.let {
             it.stop()
             it.release()
+        }
+
+        // 停止音频录制
+        if (isSaveAudioEnabled()) {
+            audioRecorder.stopRecording()
         }
 
         audioRecord = null
@@ -212,6 +249,12 @@ class KwsRecognitionService(
             audioRecord?.release()
             audioRecord = null
         }
+        
+        // 停止音频录制
+        if (isSaveAudioEnabled()) {
+            audioRecorder.stopRecording()
+        }
+        
         isListening = false
         LogUtil.i(TAG, "停止语音识别")
     }
@@ -222,8 +265,14 @@ class KwsRecognitionService(
     fun setPause(pause: Boolean) {
         if (pause) {
             audioRecord?.stop()
+            if (isSaveAudioEnabled()) {
+                audioRecorder.stopRecording()
+            }
         } else {
             audioRecord?.startRecording()
+            if (isSaveAudioEnabled()) {
+                audioRecorder.startRecording(context)
+            }
         }
         LogUtil.d(TAG, if (pause) "暂停识别" else "恢复识别")
     }

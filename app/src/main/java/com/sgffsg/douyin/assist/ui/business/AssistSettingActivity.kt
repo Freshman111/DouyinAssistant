@@ -94,6 +94,12 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
         binding.btnStopOverlay.setOnClickListener {
             stopFloatWindow()
         }
+        
+        // 打开调试界面
+        binding.btnDebug.setOnClickListener {
+            val intent = Intent(this, DebugActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun startFloatWindow() {

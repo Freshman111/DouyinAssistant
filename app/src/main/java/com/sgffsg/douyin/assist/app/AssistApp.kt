@@ -2,6 +2,7 @@ package com.sgffsg.douyin.assist.app
 
 import android.app.Application
 import com.didi.drouter.api.DRouter
+import com.sgffsg.douyin.assist.common.utils.DebugCache
 import com.sgffsg.douyin.assist.common.utils.LogUtil
 
 /**
@@ -14,5 +15,8 @@ class AssistApp : Application() {
         super.onCreate()
         LogUtil.i("AssistApp","onCrete")
         DRouter.init(this)
+        
+        // 初始化DebugCache
+        DebugCache.init(this)
     }
 }
