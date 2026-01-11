@@ -39,7 +39,7 @@ class KwsRecognitionService(
     private var audioRecord: AudioRecord? = null
     private var recordingThread: Thread? = null
 
-    private val audioSource = MediaRecorder.AudioSource.MIC
+    private val audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION
     private val sampleRateInHz = 16000
     private val channelConfig = AudioFormat.CHANNEL_IN_MONO
 
@@ -66,15 +66,6 @@ class KwsRecognitionService(
         LogUtil.i(TAG, "Start to initialize model")
         initModel()
         LogUtil.i(TAG, "Finished initializing model")
-    }
-
-    /**
-     * 设置音频保存功能开关
-     * 注意：此方法不再用于设置状态，状态由DebugCache统一管理
-     */
-    fun setSaveAudioEnabled(enabled: Boolean) {
-        // 此方法保留向后兼容性，但实际状态由DebugCache管理
-        DebugCache.setSaveAudioEnabled(enabled)
     }
 
     /**
