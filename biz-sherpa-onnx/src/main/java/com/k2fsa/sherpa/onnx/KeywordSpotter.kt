@@ -3,6 +3,8 @@ package com.k2fsa.sherpa.onnx
 
 import android.content.res.AssetManager
 
+private const val CHINESE_KWS_MODEL_DIR = "sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20"
+
 data class KeywordSpotterConfig(
     var featConfig: FeatureConfig = FeatureConfig(),
     var modelConfig: OnlineModelConfig = OnlineModelConfig(),
@@ -95,8 +97,7 @@ to add your own. (It should be straightforward to add a new model
 by following the code)
 
 @param type
-0 - sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01 (Chinese)
-    https://www.modelscope.cn/models/pkufool/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01/summary
+0 - sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20 (Chinese & English)
 
 1 - sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01 (English)
     https://www.modelscope.cn/models/pkufool/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/summary
@@ -105,12 +106,12 @@ by following the code)
 fun getKwsModelConfig(type: Int): OnlineModelConfig? {
     when (type) {
         0 -> {
-            val modelDir = "sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01"
+            val modelDir = CHINESE_KWS_MODEL_DIR
             return OnlineModelConfig(
                 transducer = OnlineTransducerModelConfig(
-                    encoder = "$modelDir/encoder-epoch-12-avg-2-chunk-16-left-64.onnx",
-                    decoder = "$modelDir/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
-                    joiner = "$modelDir/joiner-epoch-12-avg-2-chunk-16-left-64.onnx",
+                    encoder = "$modelDir/encoder-epoch-13-avg-2-chunk-16-left-64.onnx",
+                    decoder = "$modelDir/decoder-epoch-13-avg-2-chunk-16-left-64.onnx",
+                    joiner = "$modelDir/joiner-epoch-13-avg-2-chunk-16-left-64.onnx",
                 ),
                 tokens = "$modelDir/tokens.txt",
                 modelType = "zipformer2",
@@ -142,8 +143,7 @@ fun getKwsModelConfig(type: Int): OnlineModelConfig? {
 fun getKeywordsFile(type: Int): String {
     when (type) {
         0 -> {
-            val modelDir = "sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01"
-            return "$modelDir/keywords.txt"
+            return "$CHINESE_KWS_MODEL_DIR/keywords.txt"
         }
 
         1 -> {

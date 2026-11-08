@@ -1,8 +1,14 @@
 package com.sgffsg.douyin.assist.kws
 
+import android.media.MediaRecorder
 import com.sgffsg.douyin.assist.common.utils.LogUtil
 
-internal class KwsDiagnostics(private val sessionId: Int, sampleRate: Int, audioSource: Int) {
+internal class KwsDiagnostics(private val sessionId: Int, sampleRate: Int, private val audioSource: Int) {
+    private val sourceName = when (audioSource) {
+        MediaRecorder.AudioSource.VOICE_COMMUNICATION -> "VOICE_COMMUNICATION"
+        MediaRecorder.AudioSource.VOICE_RECOGNITION -> "VOICE_RECOGNITION"
+        else -> "UNKNOWN"
+    }
     private val startedAt = System.nanoTime()
     private var windowStartedAt = startedAt
     private var inputSamples = 0L
@@ -17,7 +23,7 @@ internal class KwsDiagnostics(private val sessionId: Int, sampleRate: Int, audio
     private var nextHitId = 0L
 
     init {
-        event("start", "sample_rate=$sampleRate source=$audioSource")
+        event("start", "sample_rate=$sampleRate")
     }
 
     fun recordRead(samples: ShortArray, count: Int, pcm: PcmPosition?, readNanos: Long, writeNanos: Long) {
@@ -53,7 +59,8 @@ internal class KwsDiagnostics(private val sessionId: Int, sampleRate: Int, audio
     }
 
     private fun position(): String {
-        val trace = "session_id=$sessionId trace_id=$startedAt input_samples=$inputSamples"
+        val trace = "session_id=$sessionId trace_id=$startedAt input_samples=$inputSamples " +
+            "source=$audioSource source_name=$sourceName"
         val pcm = pcmPosition ?: return trace
         return "$trace pcm_file=${pcm.fileName} pcm_end_sample=${pcm.samplesWritten}"
     }

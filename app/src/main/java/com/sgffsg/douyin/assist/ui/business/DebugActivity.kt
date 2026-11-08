@@ -18,6 +18,7 @@ class DebugActivity : AppCompatActivity() {
 
     private lateinit var cbSaveAudio: CheckBox
     private lateinit var cbSaveLogs: CheckBox
+    private lateinit var cbVoiceRecognitionSource: CheckBox
     private lateinit var btnRequestPermission: Button
     private lateinit var tvPermissionStatus: TextView
 
@@ -39,6 +40,7 @@ class DebugActivity : AppCompatActivity() {
     private fun initViews() {
         cbSaveAudio = findViewById(R.id.cb_save_audio)
         cbSaveLogs = findViewById(R.id.cb_save_logs)
+        cbVoiceRecognitionSource = findViewById(R.id.cb_voice_recognition_source)
         btnRequestPermission = findViewById(R.id.btn_request_permission)
         tvPermissionStatus = findViewById(R.id.tv_permission_status)
     }
@@ -47,6 +49,7 @@ class DebugActivity : AppCompatActivity() {
         // 根据缓存状态更新UI
         cbSaveAudio.isChecked = DebugCache.isSaveAudioEnabled()
         cbSaveLogs.isChecked = DebugCache.isFileLoggingEnabled()
+        cbVoiceRecognitionSource.isChecked = DebugCache.useVoiceRecognitionSource()
     }
 
     private fun checkPermissions() {
@@ -118,6 +121,9 @@ class DebugActivity : AppCompatActivity() {
         }
         cbSaveLogs.setOnCheckedChangeListener { _, isChecked ->
             DebugCache.setFileLoggingEnabled(isChecked)
+        }
+        cbVoiceRecognitionSource.setOnCheckedChangeListener { _, isChecked ->
+            DebugCache.setUseVoiceRecognitionSource(isChecked)
         }
     }
 

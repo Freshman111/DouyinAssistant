@@ -29,6 +29,20 @@
         android:textSize="16sp"
         android:layout_marginBottom="16dp"/>
 
+    <CheckBox
+        android:id="@+id/cb_voice_recognition_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="使用语音识别录音源（B）"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="不勾选为通话录音源（A）。切换后请关闭并重新开启语音。"
+        android:textSize="12sp"/>
+
     <TextView
         android:id="@+id/tv_permission_status"
         android:layout_width="wrap_content"

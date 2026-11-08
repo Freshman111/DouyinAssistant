@@ -39,7 +39,6 @@ class KwsRecognitionService(
     private var audioRecord: AudioRecord? = null
     private var recordingThread: Thread? = null
 
-    private val audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION
     private val sampleRateInHz = 16000
     private val channelConfig = AudioFormat.CHANNEL_IN_MONO
 
@@ -120,14 +119,13 @@ class KwsRecognitionService(
             LogUtil.w(TAG, "上一段录音正在结束")
             return false
         }
-        val ret = initMicrophone()
-        if (!ret) {
-            LogUtil.e(TAG, "Failed to initialize microphone")
-            return false
+        val audioSource = if (DebugCache.useVoiceRecognitionSource()) {
+            MediaRecorder.AudioSource.VOICE_RECOGNITION
+        } else {
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION
         }
-        val record = audioRecord ?: return false
-        LogUtil.e(TAG, "state: ${record.state}")
-        record.startRecording()
+        val record = startMicrophone(audioSource) ?: return false
+        audioRecord = record
         startAudioFile()
         
         isListening = true
@@ -223,27 +221,31 @@ class KwsRecognitionService(
         }
     }
 
-    private fun initMicrophone(): Boolean {
-
-        val numBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat)
-        LogUtil.i(TAG, "buffer size in milliseconds: ${numBytes * 1000.0f / sampleRateInHz}")
-
+    private fun startMicrophone(audioSource: Int): AudioRecord? {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.RECORD_AUDIO
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             LogUtil.e(TAG, "无录音权限")
-            return false
+            return null
         }
-        audioRecord = AudioRecord(
-            audioSource,
-            sampleRateInHz,
-            channelConfig,
-            audioFormat,
-            numBytes * 2 // a sample has two bytes as we are using 16-bit PCM
-        )
-        return true
+        val numBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat)
+        val record = try {
+            AudioRecord(audioSource, sampleRateInHz, channelConfig, audioFormat, numBytes * 2)
+        } catch (e: RuntimeException) {
+            LogUtil.e(TAG, "Failed to initialize microphone source=$audioSource", e)
+            return null
+        }
+        try {
+            record.startRecording()
+            if (record.recordingState == AudioRecord.RECORDSTATE_RECORDING) return record
+            LogUtil.e(TAG, "Microphone did not start source=$audioSource")
+        } catch (e: RuntimeException) {
+            LogUtil.e(TAG, "Failed to start microphone source=$audioSource", e)
+        }
+        record.release()
+        return null
     }
 
     /**
