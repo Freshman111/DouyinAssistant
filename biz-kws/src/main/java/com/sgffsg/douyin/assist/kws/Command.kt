@@ -20,10 +20,27 @@ enum class Command(val keywords: List<String>) {
          * 拒绝示例：跳过这段、我想跳过、快跳过、我们跳过这一段吧
          */
         private val SKIP_PHRASE = Regex("^(你|帮我|请)?跳过(吧|啊|呀|哦|嘛|把)?$")
+        private val NEXT_PHRASE = Regex("^(你|帮我|请)?(下一个视频|下一个|下一条|下一页|后一个视频|后一个|翻页)(吧|啊|呀|哦|嘛|把)?$")
+        private val PREVIOUS_PHRASE = Regex("^(你|帮我|请)?(上一个视频|上一个|上一条|上一页|前一个视频|前一个)(吧|啊|呀|哦|嘛|把)?$")
+        private val PUNCTUATION = Regex("[\\p{P}\\s]")
 
-        fun isSkipPhrase(text: String): Boolean {
-            val normalized = text.replace(Regex("[\\p{P}\\s]"), "")
-            return normalized.isNotEmpty() && SKIP_PHRASE.matches(normalized)
+        private fun normalize(text: String): String = text.replace(PUNCTUATION, "")
+
+        fun isSkipPhrase(text: String): Boolean = SKIP_PHRASE.matches(normalize(text))
+
+        /**
+         * 完整 ASR 负责的指令。返回 null 表示这句话不归 ASR 管，
+         * 关键词识别可以继续处理（例如「上滑」「返回」）。
+         */
+        fun asrCommand(text: String): Command? {
+            val normalized = normalize(text)
+            if (normalized.isEmpty()) return null
+            return when {
+                SKIP_PHRASE.matches(normalized) -> SKIP
+                NEXT_PHRASE.matches(normalized) -> SWIPE_UP
+                PREVIOUS_PHRASE.matches(normalized) -> SWIPE_DOWN
+                else -> null
+            }
         }
 
         /**

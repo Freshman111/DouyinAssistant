@@ -27,7 +27,7 @@ import kotlin.math.sqrt
 internal class VoiceExperiment(
     private val context: Context,
     private val sessionId: Int,
-    private val onCommand: ((String) -> Unit)? = null,
+    private val onCommand: ((Command, String) -> Unit)? = null,
 ) {
     private data class Frame(val samples: FloatArray, val endSample: Long, val capturedAt: Long)
     private data class Gated(val frame: Frame, val speech: BooleanArray)
@@ -169,11 +169,12 @@ internal class VoiceExperiment(
                 }
                 val asrMs = elapsedMs(start)
                 val startSample = outputSamples - WINDOW
-                val matched = Command.isSkipPhrase(text)
-                val emitted = matched && startSample >= lastHitEnd
-                if (emitted) {
+                val command = Command.asrCommand(text)
+                val matched = command != null
+                val emitted = command != null && startSample >= lastHitEnd
+                if (emitted && command != null) {
                     lastHitEnd = outputSamples
-                    onCommand?.invoke(TARGET)
+                    onCommand?.invoke(command, text)
                 }
                 val lagMs = elapsedMs(frame.capturedAt) + (frame.endSample - outputSamples) * 1000 / RATE
                 LogUtil.i(

@@ -165,8 +165,8 @@ class KwsRecognitionService(
                 VoiceExperiment(
                     context.applicationContext,
                     record.audioSessionId,
-                    if (runExperiment) null else { text ->
-                        parseAndExecuteCommand(text, null, execute = true)
+                    if (runExperiment) null else { command, text ->
+                        executeAsrCommand(command, text)
                     }
                 )
             } else {
@@ -337,6 +337,14 @@ class KwsRecognitionService(
      */
     fun isListening(): Boolean = isListening
 
+    private fun executeAsrCommand(command: Command, text: String) {
+        try {
+            listener?.onCommandRecognized(command, text, null)
+        } catch (e: Exception) {
+            LogUtil.e(TAG, "asr_command_error text=$text", e)
+        }
+    }
+
     /**
      * 解析识别结果并执行指令
      */
@@ -353,9 +361,9 @@ class KwsRecognitionService(
         try {
             val command = Command.fromText(text)
             val logSwipe = diagnostics?.hit(text, command)
-            if (command == Command.SKIP && !allowSkip) {
-                // 跳过由完整 ASR 负责，关键词识别只保留其余指令
-                LogUtil.i(TAG, "skip_from_kws text=$text")
+            if (!allowSkip && Command.asrCommand(text) != null) {
+                // 这些词由完整 ASR 负责，关键词识别只保留其余指令，避免一次口令执行两次
+                LogUtil.i(TAG, "asr_owned text=$text")
                 return
             }
             if (command != null && execute) {
