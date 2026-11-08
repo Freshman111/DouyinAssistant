@@ -15,6 +15,8 @@ object DebugCache {
     private const val KEY_SAVE_AUDIO_ENABLED = "save_audio_enabled"
     private const val KEY_FILE_LOGGING_ENABLED = "file_logging_enabled"
     private const val KEY_USE_VOICE_RECOGNITION_SOURCE = "use_voice_recognition_source"
+    private const val KEY_VOICE_EXPERIMENT = "voice_experiment"
+    private const val KEY_VOICE_EXPERIMENT_ON_DEVICE = "voice_experiment_on_device"
 
     private var sharedPreferences: SharedPreferences? = null
 
@@ -54,6 +56,20 @@ object DebugCache {
 
     fun useVoiceRecognitionSource(): Boolean =
         sharedPreferences?.getBoolean(KEY_USE_VOICE_RECOGNITION_SOURCE, false) ?: false
+
+    fun setVoiceExperimentEnabled(enabled: Boolean) {
+        sharedPreferences?.edit()?.putBoolean(KEY_VOICE_EXPERIMENT, enabled)?.apply()
+    }
+
+    fun isVoiceExperimentEnabled(): Boolean =
+        sharedPreferences?.getBoolean(KEY_VOICE_EXPERIMENT, false) ?: false
+
+    fun setVoiceExperimentOnDevice(enabled: Boolean) {
+        sharedPreferences?.edit()?.putBoolean(KEY_VOICE_EXPERIMENT_ON_DEVICE, enabled)?.apply()
+    }
+
+    fun isVoiceExperimentOnDevice(): Boolean =
+        sharedPreferences?.getBoolean(KEY_VOICE_EXPERIMENT_ON_DEVICE, false) ?: false
 
     /**
      * 获取SharedPreferences实例

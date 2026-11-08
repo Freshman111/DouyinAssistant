@@ -119,14 +119,29 @@ class KwsRecognitionService(
             LogUtil.w(TAG, "上一段录音正在结束")
             return false
         }
-        val audioSource = if (DebugCache.useVoiceRecognitionSource()) {
+        val asrReady = VoiceEnrollment.hasModels(context) && VoiceEnrollment.hasSample(context)
+        val runExperiment = DebugCache.isVoiceExperimentEnabled() && asrReady
+        if (DebugCache.isVoiceExperimentEnabled() && !asrReady) {
+            listener?.onError("请先录入我的声音")
+            return false
+        }
+        if (runExperiment && (!isSaveAudioEnabled() || !LogUtil.isFileLoggingEnabled())) {
+            listener?.onError("语音实验需要保存音频文件和应用日志")
+            return false
+        }
+        val audioSource = if (asrReady || DebugCache.useVoiceRecognitionSource()) {
             MediaRecorder.AudioSource.VOICE_RECOGNITION
         } else {
             MediaRecorder.AudioSource.VOICE_COMMUNICATION
         }
         val record = startMicrophone(audioSource) ?: return false
-        audioRecord = record
         startAudioFile()
+        if (runExperiment && !audioRecorder.isRecording()) {
+            record.release()
+            listener?.onError("语音实验无法保存音频")
+            return false
+        }
+        audioRecord = record
         
         isListening = true
 
@@ -142,8 +157,22 @@ class KwsRecognitionService(
 
         val stream = kws.createStream(normalizedKeywords)
 
+        if (asrReady) {
+            LogUtil.i(TAG, "asr session_id=${record.audioSessionId} execute=${!runExperiment}")
+        }
         recordingThread = thread(name = "KwsRecording") {
-            processData(record, stream)
+            val asr = if (asrReady) {
+                VoiceExperiment(
+                    context.applicationContext,
+                    record.audioSessionId,
+                    if (runExperiment) null else { text ->
+                        parseAndExecuteCommand(text, null, execute = true)
+                    }
+                )
+            } else {
+                null
+            }
+            processData(record, stream, asr, execute = !runExperiment, allowKwsSkip = !asrReady)
         }
 
         LogUtil.e(TAG, "Started recording")
@@ -154,7 +183,13 @@ class KwsRecognitionService(
         if (isSaveAudioEnabled()) audioRecorder.startRecording(context)
     }
 
-    private fun processData(record: AudioRecord, stream: OnlineStream) {
+    private fun processData(
+        record: AudioRecord,
+        stream: OnlineStream,
+        asr: VoiceExperiment?,
+        execute: Boolean,
+        allowKwsSkip: Boolean
+    ) {
         LogUtil.i(TAG, "processing samples")
 
         val interval = 0.1 // i.e., 100 ms
@@ -172,7 +207,7 @@ class KwsRecognitionService(
                 val readStarted = if (diagnostics != null) System.nanoTime() else 0L
                 val ret = record.read(buffer, 0, buffer.size)
                 if (!isListening) break
-                val readFinished = if (diagnostics != null) System.nanoTime() else 0L
+                val readFinished = if (diagnostics != null || asr != null) System.nanoTime() else 0L
                 val saveAudio = ret > 0 && isSaveAudioEnabled() && audioRecorder.isRecording()
                 val pcmPosition = if (saveAudio) audioRecorder.writeAudioData(buffer, ret) else null
                 if (diagnostics != null) {
@@ -188,6 +223,7 @@ class KwsRecognitionService(
                 }
 
                 val samples = FloatArray(ret) { buffer[it] / 32768.0f }
+                asr?.offer(samples, readFinished)
                 stream.acceptWaveform(samples, sampleRate = sampleRateInHz)
                 while (kws.isReady(stream)) {
                     kws.decode(stream)
@@ -198,24 +234,28 @@ class KwsRecognitionService(
                         // Remember to reset the stream right after detecting a keyword
                         kws.reset(stream)
                     }
-                    parseAndExecuteCommand(text, diagnostics)
+                    parseAndExecuteCommand(text, diagnostics, execute, allowKwsSkip)
                 }
                 diagnostics?.recordProcessing(System.nanoTime() - kwsStarted)
             }
         } finally {
             try {
-                diagnostics?.finish()
-                stream.release()
-            } finally {
-                synchronized(recordingLock) {
-                    isListening = false
-                    try {
-                        record.release()
-                    } finally {
-                        audioRecord = null
-                        audioRecorder.stopRecording()
+                try {
+                    diagnostics?.finish()
+                    stream.release()
+                } finally {
+                    synchronized(recordingLock) {
+                        isListening = false
+                        try {
+                            record.release()
+                        } finally {
+                            audioRecord = null
+                            audioRecorder.stopRecording()
+                        }
                     }
                 }
+            } finally {
+                asr?.close()
             }
             LogUtil.i(TAG, "Released stream. Stopped")
         }
@@ -300,7 +340,12 @@ class KwsRecognitionService(
     /**
      * 解析识别结果并执行指令
      */
-    private fun parseAndExecuteCommand(text: String, diagnostics: KwsDiagnostics?) {
+    private fun parseAndExecuteCommand(
+        text: String,
+        diagnostics: KwsDiagnostics?,
+        execute: Boolean,
+        allowSkip: Boolean = true
+    ) {
         if (text.isBlank()) {
             return
         }
@@ -308,7 +353,12 @@ class KwsRecognitionService(
         try {
             val command = Command.fromText(text)
             val logSwipe = diagnostics?.hit(text, command)
-            if (command != null) {
+            if (command == Command.SKIP && !allowSkip) {
+                // 跳过由完整 ASR 负责，关键词识别只保留其余指令
+                LogUtil.i(TAG, "skip_from_kws text=$text")
+                return
+            }
+            if (command != null && execute) {
                 listener?.onCommandRecognized(command, text, logSwipe)
             }
         } catch (e: Exception) {

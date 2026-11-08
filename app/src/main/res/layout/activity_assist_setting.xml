@@ -137,7 +137,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_overlay"
+            android:id="@+id/card_voice_sample"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_dp_8"
@@ -146,6 +146,58 @@
             app:cardCornerRadius="@dimen/dimen_dp_8"
             app:cardElevation="@dimen/dimen_dp_4"
             app:layout_constraintTop_toBottomOf="@id/card_voice">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="记住你的声音"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="用你的声音把口令和视频里的人声分开，能明显提高识别准确率。录一次即可；觉得准确率变低时可以重新录。录音只保存在本机。"
+                    android:textColor="#666666"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_voice_sample_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="未录入"
+                    android:textColor="#999999"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btn_voice_sample"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="录入我的声音" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_dp_8"
+            android:layout_marginEnd="@dimen/dimen_dp_8"
+            android:layout_marginTop="@dimen/dimen_dp_16"
+            app:cardCornerRadius="@dimen/dimen_dp_8"
+            app:cardElevation="@dimen/dimen_dp_4"
+            app:layout_constraintTop_toBottomOf="@id/card_voice_sample">
 
             <LinearLayout
                 android:layout_width="match_parent"

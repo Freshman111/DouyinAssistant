@@ -182,6 +182,8 @@ class AssistAccessibilityService : AccessibilityService() {
         LogUtil.d(TAG, "语音控制已关闭")
     }
 
+    fun isVoiceControlActive(): Boolean = isVoiceControlEnabled
+
     /**
      * 执行语音指令
      */

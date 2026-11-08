@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
 
@@ -43,6 +46,46 @@
         android:text="不勾选为通话录音源（A）。切换后请关闭并重新开启语音。"
         android:textSize="12sp"/>
 
+    <LinearLayout
+        android:id="@+id/voice_experiment_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btn_enroll_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="录入我的声音" />
+
+        <TextView
+            android:id="@+id/tv_voice_sample"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="未录入声样" />
+
+        <CheckBox
+            android:id="@+id/cb_voice_experiment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="语音实验（录音对照）" />
+
+        <CheckBox
+            android:id="@+id/cb_voice_experiment_on_device"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="同时在手机上运行新模型（测速）" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="实验使用 B 录音源，保存 PCM 和日志，不执行滑动。切换后请重新开启语音。"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tv_permission_status"
         android:layout_width="wrap_content"
@@ -66,3 +109,4 @@
         android:textColor="#666666"/>
 
 </LinearLayout>
+</ScrollView>

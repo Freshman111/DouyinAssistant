@@ -34,6 +34,7 @@ class KeywordSpotter(
         } else {
             newFromFile(config)
         }
+        require(ptr != 0L) { "Failed to create native KeywordSpotter" }
     }
 
     protected fun finalize() {
@@ -53,15 +54,7 @@ class KeywordSpotter(
     fun decode(stream: OnlineStream) = decode(ptr, stream.ptr)
     fun reset(stream: OnlineStream) = reset(ptr, stream.ptr)
     fun isReady(stream: OnlineStream) = isReady(ptr, stream.ptr)
-    fun getResult(stream: OnlineStream): KeywordSpotterResult {
-        val objArray = getResult(ptr, stream.ptr)
-
-        val keyword = objArray[0] as String
-        val tokens = objArray[1] as Array<String>
-        val timestamps = objArray[2] as FloatArray
-
-        return KeywordSpotterResult(keyword = keyword, tokens = tokens, timestamps = timestamps)
-    }
+    fun getResult(stream: OnlineStream): KeywordSpotterResult = getResult(ptr, stream.ptr)
 
     private external fun delete(ptr: Long)
 
@@ -78,7 +71,7 @@ class KeywordSpotter(
     private external fun isReady(ptr: Long, streamPtr: Long): Boolean
     private external fun decode(ptr: Long, streamPtr: Long)
     private external fun reset(ptr: Long, streamPtr: Long)
-    private external fun getResult(ptr: Long, streamPtr: Long): Array<Any>
+    private external fun getResult(ptr: Long, streamPtr: Long): KeywordSpotterResult
 
     companion object {
         init {

@@ -1,6 +1,7 @@
 package com.sgffsg.douyin.assist.ui.business
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -11,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import com.sgffsg.douyin.assist.R
 import com.sgffsg.douyin.assist.core.accessibility.AssistAccessibilityService
+import com.sgffsg.douyin.assist.kws.VoiceEnrollment
 import com.sgffsg.douyin.assist.biz.overlay.FloatWindowService
 import com.sgffsg.douyin.assist.databinding.ActivityAssistSettingBinding
 import com.sgffsg.douyin.assist.permissions.PermissionUtil
@@ -24,6 +26,11 @@ import com.sgffsg.douyin.assist.viewmodel.MainViewModel
 class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>() {
 
     private lateinit var viewModel: MainViewModel
+    private var enrollThenStart = false
+
+    private companion object {
+        const val REQUEST_ENROLL = 72
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +68,11 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
             PermissionX.with(this)
                 .permission(Manifest.permission.RECORD_AUDIO)
                 .onGranted {
-                    startVoiceControl()
+                    if (VoiceEnrollment.hasSample(this)) {
+                        startVoiceControl()
+                    } else {
+                        promptEnrollment()
+                    }
                 }
                 .onDenied { deniedList ->
                     Toast.makeText(this, "您拒绝了权限: $deniedList", Toast.LENGTH_SHORT).show()
@@ -70,6 +81,20 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
                     showRequestPermissionDlg(R.string.settings_page_permission_tip)
                 }
                 .request()
+        }
+
+        // 记住你的声音
+        binding.btnVoiceSample.setOnClickListener {
+            if (VoiceEnrollment.hasSample(this)) {
+                androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("重新录入？")
+                    .setMessage("新的录音会覆盖现在的声样，录完立刻生效。准不准取决于这次录得清不清楚。")
+                    .setPositiveButton("重新录入") { _, _ -> openEnrollment() }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else {
+                openEnrollment()
+            }
         }
 
         // 关闭语音控制
@@ -132,6 +157,52 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
         }
     }
 
+    private fun openEnrollment() {
+        enrollThenStart = false
+        startActivityForResult(
+            Intent(this, VoiceEnrollmentActivity::class.java), REQUEST_ENROLL
+        )
+    }
+
+    private fun updateVoiceSampleStatus() {
+        val hasSample = VoiceEnrollment.hasSample(this)
+        binding.tvVoiceSampleStatus.text = if (hasSample) {
+            val date = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                .format(java.util.Date(VoiceEnrollment.sampleModifiedAt(this)))
+            "已录入 $date · 觉得准确率变低时可以重新录"
+        } else {
+            "未录入 · 完整识别不可用，会退回关键词识别"
+        }
+        binding.btnVoiceSample.text = if (hasSample) "重新录入" else "录入我的声音"
+    }
+
+    private fun promptEnrollment() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("先录入我的声音")
+            .setMessage("完整识别需要用你的声音把口令和视频里的人声分开。录入约 10 秒，录音只保存在这台手机上，可随时删除。")
+            .setPositiveButton("去录入") { _, _ ->
+                enrollThenStart = true
+                startActivityForResult(
+                    Intent(this@AssistSettingActivity, VoiceEnrollmentActivity::class.java),
+                    REQUEST_ENROLL
+                )
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_ENROLL && resultCode == Activity.RESULT_OK) {
+            updateVoiceSampleStatus()
+            Toast.makeText(this, "已记住你的声音", Toast.LENGTH_SHORT).show()
+            if (enrollThenStart) {
+                enrollThenStart = false
+                startVoiceControl()
+            }
+        }
+    }
+
     private fun startVoiceControl() {
         val success = AssistAccessibilityService.instance?.startVoiceControl() ?: false
         if (success) {
@@ -158,6 +229,7 @@ class AssistSettingActivity : BaseBindingActivity<ActivityAssistSettingBinding>(
         // 每次返回时检查服务状态
         val isEnabled = AssistAccessibilityService.isAccessibilitySettingsOn(this)
         updateServiceStatus(isEnabled)
+        updateVoiceSampleStatus()
     }
 
 }
