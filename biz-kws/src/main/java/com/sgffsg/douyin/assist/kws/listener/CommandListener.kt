@@ -10,8 +10,9 @@ interface CommandListener {
      * 识别到语音指令
      * @param command 语音指令
      * @param originalText 原始识别文本
+     * @param logSwipe 记录滑动派发和完成状态的可选诊断回调
      */
-    fun onCommandRecognized(command: Command, originalText: String)
+    fun onCommandRecognized(command: Command, originalText: String, logSwipe: ((String) -> Unit)?)
     
     /**
      * 识别错误

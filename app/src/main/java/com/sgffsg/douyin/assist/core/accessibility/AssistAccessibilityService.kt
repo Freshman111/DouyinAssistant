@@ -121,9 +121,9 @@ class AssistAccessibilityService : AccessibilityService() {
     private fun initVoiceRecognition() {
         voiceRecognitionService = KwsRecognitionService(this)
         voiceRecognitionService?.setVoiceCommandListener(object : CommandListener {
-            override fun onCommandRecognized(command: Command, originalText: String) {
+            override fun onCommandRecognized(command: Command, originalText: String, logSwipe: ((String) -> Unit)?) {
                 LogUtil.d(TAG, "收到语音指令: ${command.name}, 原始文本: $originalText")
-                executeVoiceCommand(command)
+                executeVoiceCommand(command, logSwipe)
             }
 
             override fun onError(error: String) {
@@ -185,26 +185,26 @@ class AssistAccessibilityService : AccessibilityService() {
     /**
      * 执行语音指令
      */
-    private fun executeVoiceCommand(command: Command) {
+    private fun executeVoiceCommand(command: Command, logSwipe: ((String) -> Unit)?) {
         when (command) {
             Command.SWIPE_UP -> {
-                performer.performSwipeUp()
+                performer.performSwipeUp(logSwipe)
                 LogUtil.d(TAG, "执行语音指令: 上滑")
             }
             Command.SWIPE_DOWN -> {
-                performer.performSwipeDown()
+                performer.performSwipeDown(logSwipe)
                 LogUtil.d(TAG, "执行语音指令: 下滑")
             }
             Command.NEXT_PAGE -> {
-                performer.performSwipeUp()
+                performer.performSwipeUp(logSwipe)
                 LogUtil.d(TAG, "执行语音指令: 下一页")
             }
             Command.PREVIOUS_PAGE -> {
-                performer.performSwipeDown()
+                performer.performSwipeDown(logSwipe)
                 LogUtil.d(TAG, "执行语音指令: 上一页")
             }
             Command.SKIP -> {
-                performer.performSwipeUp()
+                performer.performSwipeUp(logSwipe)
                 LogUtil.d(TAG, "执行语音指令: 跳过")
             }
             Command.LIKE -> {

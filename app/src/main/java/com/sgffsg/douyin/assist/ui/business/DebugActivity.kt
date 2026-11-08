@@ -17,6 +17,7 @@ import com.sgffsg.douyin.assist.common.utils.DebugCache
 class DebugActivity : AppCompatActivity() {
 
     private lateinit var cbSaveAudio: CheckBox
+    private lateinit var cbSaveLogs: CheckBox
     private lateinit var btnRequestPermission: Button
     private lateinit var tvPermissionStatus: TextView
 
@@ -31,12 +32,13 @@ class DebugActivity : AppCompatActivity() {
 
         initViews()
         checkPermissions()
-        setupListeners()
         updateUI()
+        setupListeners()
     }
 
     private fun initViews() {
         cbSaveAudio = findViewById(R.id.cb_save_audio)
+        cbSaveLogs = findViewById(R.id.cb_save_logs)
         btnRequestPermission = findViewById(R.id.btn_request_permission)
         tvPermissionStatus = findViewById(R.id.tv_permission_status)
     }
@@ -44,6 +46,7 @@ class DebugActivity : AppCompatActivity() {
     private fun updateUI() {
         // 根据缓存状态更新UI
         cbSaveAudio.isChecked = DebugCache.isSaveAudioEnabled()
+        cbSaveLogs.isChecked = DebugCache.isFileLoggingEnabled()
     }
 
     private fun checkPermissions() {
@@ -112,6 +115,9 @@ class DebugActivity : AppCompatActivity() {
             // 更新缓存中的开关状态
             DebugCache.setSaveAudioEnabled(isChecked)
             Toast.makeText(this, "音频保存: ${if (isChecked) "开启" else "关闭"}", Toast.LENGTH_SHORT).show()
+        }
+        cbSaveLogs.setOnCheckedChangeListener { _, isChecked ->
+            DebugCache.setFileLoggingEnabled(isChecked)
         }
     }
 

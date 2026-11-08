@@ -40,7 +40,7 @@ class AssistAccessibilityPerform(
     /**
      * 执行向上滑动（下一个视频）
      */
-    fun performSwipeUp() {
+    fun performSwipeUp(logResult: ((String) -> Unit)? = null) {
         val screenWidth = service.resources.displayMetrics.widthPixels
         val screenHeight = service.resources.displayMetrics.heightPixels
         
@@ -48,14 +48,14 @@ class AssistAccessibilityPerform(
         val startY = screenHeight * 0.8f
         val endY = screenHeight * 0.2f
         
-        performSwipe(startX, startY, startX, endY, 300)
+        performSwipe(startX, startY, startX, endY, 300, logResult)
         LogUtil.d(TAG, "执行向上滑动")
     }
 
     /**
      * 执行向下滑动（上一个视频）
      */
-    fun performSwipeDown() {
+    fun performSwipeDown(logResult: ((String) -> Unit)? = null) {
         val screenWidth = service.resources.displayMetrics.widthPixels
         val screenHeight = service.resources.displayMetrics.heightPixels
         
@@ -63,7 +63,7 @@ class AssistAccessibilityPerform(
         val startY = screenHeight * 0.2f
         val endY = screenHeight * 0.8f
         
-        performSwipe(startX, startY, startX, endY, 300)
+        performSwipe(startX, startY, startX, endY, 300, logResult)
         LogUtil.d(TAG, "执行向下滑动")
     }
 
@@ -94,7 +94,7 @@ class AssistAccessibilityPerform(
     /**
      * 执行滑动手势
      */
-    private fun performSwipe(startX: Float, startY: Float, endX: Float, endY: Float, duration: Long) {
+    private fun performSwipe(startX: Float, startY: Float, endX: Float, endY: Float, duration: Long, logResult: ((String) -> Unit)?) {
         val path = Path()
         path.moveTo(startX, startY)
         path.lineTo(endX, endY)
@@ -102,7 +102,14 @@ class AssistAccessibilityPerform(
         val builder = GestureDescription.Builder()
         builder.addStroke(GestureDescription.StrokeDescription(path, 0, duration))
         
-        service.dispatchGesture(builder.build(), null, null)
+        val callback = logResult?.let { log ->
+            object : AccessibilityService.GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription) = log("completed")
+                override fun onCancelled(gestureDescription: GestureDescription) = log("cancelled")
+            }
+        }
+        val accepted = service.dispatchGesture(builder.build(), callback, null)
+        logResult?.invoke(if (accepted) "accepted" else "rejected")
     }
 
     /**

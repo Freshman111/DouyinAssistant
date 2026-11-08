@@ -13,6 +13,7 @@ object DebugCache {
 
     private const val DEBUG_PREF_NAME = "debug_preferences"
     private const val KEY_SAVE_AUDIO_ENABLED = "save_audio_enabled"
+    private const val KEY_FILE_LOGGING_ENABLED = "file_logging_enabled"
 
     private var sharedPreferences: SharedPreferences? = null
 
@@ -37,6 +38,14 @@ object DebugCache {
     fun isSaveAudioEnabled(): Boolean {
         return sharedPreferences?.getBoolean(KEY_SAVE_AUDIO_ENABLED, false) ?: false
     }
+
+    fun setFileLoggingEnabled(enabled: Boolean) {
+        sharedPreferences?.edit()?.putBoolean(KEY_FILE_LOGGING_ENABLED, enabled)?.apply()
+        LogUtil.setFileLoggingEnabled(enabled)
+    }
+
+    fun isFileLoggingEnabled(): Boolean =
+        sharedPreferences?.getBoolean(KEY_FILE_LOGGING_ENABLED, false) ?: false
 
     /**
      * 获取SharedPreferences实例

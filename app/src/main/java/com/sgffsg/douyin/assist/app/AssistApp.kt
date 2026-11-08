@@ -13,10 +13,9 @@ import com.sgffsg.douyin.assist.common.utils.LogUtil
 class AssistApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        LogUtil.i("AssistApp","onCrete")
-        DRouter.init(this)
-        
-        // 初始化DebugCache
         DebugCache.init(this)
+        LogUtil.init(this, DebugCache.isFileLoggingEnabled())
+        LogUtil.i("AssistApp", "onCreate")
+        DRouter.init(this)
     }
 }

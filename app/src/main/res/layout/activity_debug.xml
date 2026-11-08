@@ -21,6 +21,14 @@
         android:textSize="16sp"
         android:layout_marginBottom="16dp"/>
 
+    <CheckBox
+        android:id="@+id/cb_save_logs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="保留应用日志"
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp"/>
+
     <TextView
         android:id="@+id/tv_permission_status"
         android:layout_width="wrap_content"
@@ -39,7 +47,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="说明:\n- 开启保存音频功能会将录制的音频保存到设备上\n- 仅用于调试目的，请注意隐私保护"
+        android:text="音频保存和日志保留可分别开启。应用日志保存在 files/logs 目录。"
         android:textSize="12sp"
         android:textColor="#666666"/>
 

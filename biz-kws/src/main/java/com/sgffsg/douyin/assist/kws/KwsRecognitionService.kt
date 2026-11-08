@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.media.audiofx.AcousticEchoCanceler
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.k2fsa.sherpa.onnx.KeywordSpotter
@@ -31,11 +30,12 @@ class KwsRecognitionService(
     private val TAG = "VoiceRecognitionService"
     
     private var isInitialized = false
+    @Volatile
     private var isListening = false
     private lateinit var kws: KeywordSpotter
-    private lateinit var stream: OnlineStream
 
     //------ record start
+    private val recordingLock = Any()
     private var audioRecord: AudioRecord? = null
     private var recordingThread: Thread? = null
 
@@ -105,7 +105,7 @@ class KwsRecognitionService(
     /**
      * 开始语音识别
      */
-    fun startListening(): Boolean {
+    fun startListening(): Boolean = synchronized(recordingLock) {
         if (!isInitialized) {
             LogUtil.e(TAG, "模型未初始化，无法开始识别")
             listener?.onError("模型未初始化")
@@ -116,18 +116,19 @@ class KwsRecognitionService(
             LogUtil.w(TAG, "已在监听中")
             return true
         }
+        if (recordingThread?.isAlive == true) {
+            LogUtil.w(TAG, "上一段录音正在结束")
+            return false
+        }
         val ret = initMicrophone()
         if (!ret) {
             LogUtil.e(TAG, "Failed to initialize microphone")
             return false
         }
-        LogUtil.e(TAG, "state: ${audioRecord?.state}")
-        audioRecord?.startRecording()
-        
-        // 如果启用了音频保存，则开始录制
-        if (isSaveAudioEnabled()) {
-            audioRecorder.startRecording(context)
-        }
+        val record = audioRecord ?: return false
+        LogUtil.e(TAG, "state: ${record.state}")
+        record.startRecording()
+        startAudioFile()
         
         isListening = true
 
@@ -141,31 +142,53 @@ class KwsRecognitionService(
 
         Log.i(TAG, "Normalized keywords: $normalizedKeywords")
 
-        stream = kws.createStream(normalizedKeywords)
+        val stream = kws.createStream(normalizedKeywords)
 
-        recordingThread = thread(true) {
-            processData()
+        recordingThread = thread(name = "KwsRecording") {
+            processData(record, stream)
         }
 
         LogUtil.e(TAG, "Started recording")
-        return true
+        true
     }
 
-    private fun processData() {
+    private fun startAudioFile() {
+        if (isSaveAudioEnabled()) audioRecorder.startRecording(context)
+    }
+
+    private fun processData(record: AudioRecord, stream: OnlineStream) {
         LogUtil.i(TAG, "processing samples")
 
         val interval = 0.1 // i.e., 100 ms
         val bufferSize = (interval * sampleRateInHz).toInt() // in samples
         val buffer = ShortArray(bufferSize)
+        var diagnostics: KwsDiagnostics? = null
 
-        while (isListening) {
-            val ret = audioRecord?.read(buffer, 0, buffer.size)
-            if (ret != null && ret > 0) {
-                // 如果启用了音频保存，保存原始音频数据
-                if (isSaveAudioEnabled() && audioRecorder.isRecording()) {
-                    audioRecorder.writeAudioData(buffer, ret)
+        try {
+            while (isListening) {
+                diagnostics = if (LogUtil.isFileLoggingEnabled()) {
+                    diagnostics ?: KwsDiagnostics(record.audioSessionId, sampleRateInHz, record.audioSource)
+                } else {
+                    null
                 }
-                
+                val readStarted = if (diagnostics != null) System.nanoTime() else 0L
+                val ret = record.read(buffer, 0, buffer.size)
+                if (!isListening) break
+                val readFinished = if (diagnostics != null) System.nanoTime() else 0L
+                val saveAudio = ret > 0 && isSaveAudioEnabled() && audioRecorder.isRecording()
+                val pcmPosition = if (saveAudio) audioRecorder.writeAudioData(buffer, ret) else null
+                if (diagnostics != null) {
+                    diagnostics.recordRead(
+                        buffer, ret, pcmPosition, readFinished - readStarted,
+                        if (saveAudio) System.nanoTime() - readFinished else 0L
+                    )
+                }
+                val kwsStarted = if (diagnostics != null) System.nanoTime() else 0L
+                if (ret <= 0) {
+                    diagnostics?.recordProcessing(0)
+                    continue
+                }
+
                 val samples = FloatArray(ret) { buffer[it] / 32768.0f }
                 stream.acceptWaveform(samples, sampleRate = sampleRateInHz)
                 while (kws.isReady(stream)) {
@@ -177,25 +200,27 @@ class KwsRecognitionService(
                         // Remember to reset the stream right after detecting a keyword
                         kws.reset(stream)
                     }
-                    parseAndExecuteCommand(text)
+                    parseAndExecuteCommand(text, diagnostics)
+                }
+                diagnostics?.recordProcessing(System.nanoTime() - kwsStarted)
+            }
+        } finally {
+            try {
+                diagnostics?.finish()
+                stream.release()
+            } finally {
+                synchronized(recordingLock) {
+                    isListening = false
+                    try {
+                        record.release()
+                    } finally {
+                        audioRecord = null
+                        audioRecorder.stopRecording()
+                    }
                 }
             }
+            LogUtil.i(TAG, "Released stream. Stopped")
         }
-
-        stream.release()
-        LogUtil.i(TAG, "Released stream. Stopped")
-
-        audioRecord?.let {
-            it.stop()
-            it.release()
-        }
-
-        // 停止音频录制
-        if (isSaveAudioEnabled()) {
-            audioRecorder.stopRecording()
-        }
-
-        audioRecord = null
     }
 
     private fun initMicrophone(): Boolean {
@@ -224,46 +249,34 @@ class KwsRecognitionService(
     /**
      * 停止语音识别
      */
-    fun stopListening() {
+    fun stopListening() = synchronized(recordingLock) {
         if (!isListening) {
             return
         }
+        val record = audioRecord
+        isListening = false
         try {
-            // 确保处于录制状态
-            if (audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                audioRecord?.stop()
+            if (record?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                record.stop()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            // 释放资源
-            audioRecord?.release()
-            audioRecord = null
+            LogUtil.e(TAG, "Failed to stop microphone", e)
         }
-        
-        // 停止音频录制
-        if (isSaveAudioEnabled()) {
-            audioRecorder.stopRecording()
-        }
-        
-        isListening = false
         LogUtil.i(TAG, "停止语音识别")
     }
 
     /**
      * 暂停/恢复识别
      */
-    fun setPause(pause: Boolean) {
+    fun setPause(pause: Boolean) = synchronized(recordingLock) {
+        if (!isListening) return
+        val record = audioRecord ?: return
         if (pause) {
-            audioRecord?.stop()
-            if (isSaveAudioEnabled()) {
-                audioRecorder.stopRecording()
-            }
+            record.stop()
+            audioRecorder.stopRecording()
         } else {
-            audioRecord?.startRecording()
-            if (isSaveAudioEnabled()) {
-                audioRecorder.startRecording(context)
-            }
+            record.startRecording()
+            startAudioFile()
         }
         LogUtil.d(TAG, if (pause) "暂停识别" else "恢复识别")
     }
@@ -285,20 +298,16 @@ class KwsRecognitionService(
     /**
      * 解析识别结果并执行指令
      */
-    private fun parseAndExecuteCommand(text: String?) {
-        if (text.isNullOrBlank()) {
+    private fun parseAndExecuteCommand(text: String, diagnostics: KwsDiagnostics?) {
+        if (text.isBlank()) {
             return
         }
         LogUtil.i(TAG, "parseAndExecuteCommand: $text")
         try {
-//            AsrDispatcher.getInstance().onAsrRecognized(text)
-            // 匹配语音指令
             val command = Command.fromText(text)
+            val logSwipe = diagnostics?.hit(text, command)
             if (command != null) {
-//                LogUtil.i(TAG, "匹配到指令: ${command.name}")
-                listener?.onCommandRecognized(command, text)
-            } else {
-//                LogUtil.d(TAG, "未匹配到有效指令: $text")
+                listener?.onCommandRecognized(command, text, logSwipe)
             }
         } catch (e: Exception) {
             LogUtil.e(TAG, "解析识别结果失败: ${e.message}", e)

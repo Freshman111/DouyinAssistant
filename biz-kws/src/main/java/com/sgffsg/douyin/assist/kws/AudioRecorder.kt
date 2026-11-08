@@ -12,6 +12,8 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
+internal data class PcmPosition(val fileName: String, val samplesWritten: Long)
+
 /**
  * 音频录制和保存工具类
  */
@@ -19,8 +21,9 @@ class AudioRecorder {
     private val TAG = "AudioRecorder"
 
     private val lock = ReentrantLock() // 线程安全锁
-    private var outputFile: File? = null
     private var outputStream: FileOutputStream? = null
+    private var outputFile: File? = null
+    private var samplesWritten = 0L
     // 标记是否正在录制，volatile保证可见性
     @Volatile
     private var isRecording = false
@@ -33,17 +36,17 @@ class AudioRecorder {
             if (isRecording) return@withLock false
             try {
                 // 创建输出文件
-                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.ROOT).format(Date())
                 val fileName = "audio_recording_$timeStamp.pcm"
-                outputFile = File(getExternalFilesDir(context), fileName)
-                outputFile?.let {
-                    LogUtil.i(TAG, "startRecording path:${outputFile?.path}")
-                    outputStream = FileOutputStream(it)
-                }
+                val outputFile = File(getExternalFilesDir(context), fileName)
+                outputStream = FileOutputStream(outputFile)
+                this.outputFile = outputFile
+                samplesWritten = 0
+                LogUtil.i(TAG, "startRecording path:${outputFile.path}")
                 isRecording = true
                 true
             } catch (e: IOException) {
-                e.printStackTrace()
+                LogUtil.e(TAG, "Failed to start PCM recording", e)
                 false
             }
         }
@@ -53,10 +56,12 @@ class AudioRecorder {
     /**
      * 写入音频数据
      */
-    fun writeAudioData(data: ShortArray, length: Int): Boolean {
+    internal fun writeAudioData(data: ShortArray, length: Int): PcmPosition? {
         return lock.withLock {
-            if (!isRecording || outputStream == null || length <= 0 || length > data.size) {
-                return@withLock false
+            val output = outputStream ?: return@withLock null
+            val file = outputFile ?: return@withLock null
+            if (!isRecording || length <= 0 || length > data.size) {
+                return@withLock null
             }
 
             try {
@@ -67,14 +72,14 @@ class AudioRecorder {
                 byteBuffer.asShortBuffer().put(data, 0, length)
 
                 val byteArray = byteBuffer.array()
-                outputStream?.write(byteArray, 0, length * 2) // 只写入有效长度的字节
-                outputStream?.flush() // 立即刷新，避免数据滞留
-                return@withLock true
+                output.write(byteArray, 0, length * 2)
+                samplesWritten += length
+                return@withLock PcmPosition(file.name, samplesWritten)
             } catch (e: IOException) {
-                e.printStackTrace()
+                LogUtil.e(TAG, "Failed to write PCM recording", e)
                 // 写入失败时停止录制，避免持续错误
                 stopRecording()
-                return@withLock false
+                return@withLock null
             }
         }
     }
@@ -87,12 +92,12 @@ class AudioRecorder {
             if (!isRecording) return@withLock
             isRecording = false
             try {
-                outputStream?.flush()
                 outputStream?.close()
             } catch (e: IOException) {
-                e.printStackTrace()
+                LogUtil.e(TAG, "Failed to close PCM recording", e)
             } finally {
                 outputStream = null
+                outputFile = null
             }
         }
     }
