@@ -1,20 +1,45 @@
+# Android / Gradle
 *.iml
-.gradle
-/local.properties
-/.idea
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+.gradle/
+.kotlin/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
 local.properties
+
+# IDE
+.idea/
+
+# macOS
+.DS_Store
+
+# Signing material — never commit
+sign/
+*.jks
+*.keystore
+*.p12
+*.pfx
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
+.venv/
+
+# Local recordings, logs and captured audio
+*.pcm
+*.wav
+*.log
+
+# Local tools / temporary checkouts
+.tools/
+.gh-config/
+.open-source-build/

@@ -32,28 +32,44 @@ android {
         }
     }
 
+    // Signing is optional for an open-source checkout. If a local keystore and
+    // password exist, use them for both debug and release so existing installs
+    // keep updating; otherwise fall back to the default debug signing.
+    def signingKeystore = rootProject.file('sign/douyin-assist-key.jks')
+    def signingPassword = localProperties.getProperty('sign_pasword')
+    def hasCustomSigning = signingKeystore.exists() &&
+            signingPassword != null && !signingPassword.trim().isEmpty()
+
     signingConfigs {
-        debug {
-            storeFile file("$rootProject.projectDir/sign/douyin-assist-key.jks")
-            storePassword localProperties.getProperty('sign_pasword')
-            keyAlias 'douyin-assist-alias'
-            keyPassword localProperties.getProperty('sign_pasword')
-            v1SigningEnabled true
-            v2SigningEnabled true
-        }
-        release {
-            storeFile file("$rootProject.projectDir/sign/douyin-assist-key.jks")
-            storePassword localProperties.getProperty('sign_pasword')
-            keyAlias 'douyin-assist-alias'
-            keyPassword localProperties.getProperty('sign_pasword')
-            v1SigningEnabled true
-            v2SigningEnabled true
+        if (hasCustomSigning) {
+            debug {
+                storeFile signingKeystore
+                storePassword signingPassword
+                keyAlias 'douyin-assist-alias'
+                keyPassword signingPassword
+                v1SigningEnabled true
+                v2SigningEnabled true
+            }
+            release {
+                storeFile signingKeystore
+                storePassword signingPassword
+                keyAlias 'douyin-assist-alias'
+                keyPassword signingPassword
+                v1SigningEnabled true
+                v2SigningEnabled true
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (hasCustomSigning) {
+                signingConfig signingConfigs.release
+            } else {
+                // Still produce an installable APK for local testing. Replace this
+                // with your own release key before distributing a build.
+                signingConfig signingConfigs.debug
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

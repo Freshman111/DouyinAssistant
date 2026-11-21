@@ -1,0 +1,52 @@
+DouyinAssistant (随声刷)
+Copyright 2026 Freshman111
+
+This product includes software and models developed by third parties.
+The following list is provided for attribution; refer to each upstream
+project for the exact license text and any additional terms.
+
+Software
+--------
+sherpa-onnx
+  Apache License 2.0
+  https://github.com/k2-fsa/sherpa-onnx
+
+Vosk
+  Apache License 2.0
+  https://github.com/alphacep/vosk-api
+
+ONNX Runtime
+  MIT License
+  https://github.com/microsoft/onnxruntime
+
+AndroidX
+  Apache License 2.0
+  https://developer.android.com/jetpack/androidx
+
+Material Components for Android
+  Apache License 2.0
+  https://github.com/material-components/material-components-android
+
+DRouter
+  Apache License 2.0
+  https://github.com/didi/DRouter
+
+Material Dialogs
+  Apache License 2.0
+  https://github.com/afollestad/material-dialogs
+
+Bundled models
+--------------
+sherpa-onnx KWS Zipformer (zh-en, 3M)
+  Apache License 2.0
+  https://github.com/k2-fsa/sherpa-onnx
+
+Vosk Chinese small model
+  Apache License 2.0
+  https://alphacephei.com/vosk/models
+
+Optional models (not redistributed in this repository)
+------------------------------------------------------
+VoxLock speaker separation models and Paraformer Chinese Small INT8
+  See the sherpa-onnx model documentation and the upstream model pages
+  for license terms before downloading or redistributing them.

@@ -1,0 +1,13 @@
+# Copy this file to local.properties and edit sdk.dir.
+# local.properties is ignored by git and must not be committed.
+
+# Android SDK location
+# macOS:   /Users/<you>/Library/Android/sdk
+# Linux:   /home/<you>/Android/Sdk
+# Windows: C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+sdk.dir=/Users/your-name/Library/Android/sdk
+
+# Optional. Only needed if you put your own keystore at
+# sign/douyin-assist-key.jks with alias `douyin-assist-alias`.
+# The spelling `sign_pasword` matches app/build.gradle.
+# sign_pasword=change-me
